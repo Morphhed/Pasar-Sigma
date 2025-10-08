@@ -151,6 +151,38 @@ const initialUsers: User[] = Array.from(new Set(initialListings.map(p => p.selle
         };
     });
 
+const USERS_STORAGE_KEY = 'pasarUnsriUsers';
+
+function saveUsersToStorage(users: User[]) {
+    try {
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+    } catch (e) {
+        console.error("Failed to save users to localStorage", e);
+    }
+}
+
+function loadUsersFromStorage(): User[] | null {
+    try {
+        const usersJson = localStorage.getItem(USERS_STORAGE_KEY);
+        if (usersJson) {
+            return JSON.parse(usersJson);
+        }
+        return null;
+    } catch (e) {
+        console.error("Failed to load or parse users from localStorage", e);
+        // Clear corrupted data
+        localStorage.removeItem(USERS_STORAGE_KEY);
+        return null;
+    }
+}
+
+// Initialize users from storage, or use mock data and persist it.
+const persistedUsers = loadUsersFromStorage();
+const initialUsersData = persistedUsers || initialUsers;
+if (!persistedUsers) {
+    saveUsersToStorage(initialUsersData);
+}
+
 // =============== APP STATE ===============
 export let state: AppState = {
     currentView: 'login',
@@ -160,7 +192,7 @@ export let state: AppState = {
     isProfileMenuOpen: false,
     listings: initialListings,
     filter: { query: '', faculty: null },
-    users: initialUsers,
+    users: initialUsersData,
     currentUser: null,
     viewingProfileOf: null,
     viewingProduct: null,
@@ -177,6 +209,10 @@ export function subscribe(callback: () => void) {
 }
 
 export function setState(newState: Partial<AppState>) {
+    // If the users array is being updated, save it to localStorage.
+    if (newState.users) {
+        saveUsersToStorage(newState.users);
+    }
     Object.assign(state, newState);
     renderCallback();
 }

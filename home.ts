@@ -5,6 +5,11 @@
 import { state, setState, showNotification, formatRupiah, debounce, ProductCard, findUserByName } from './shared';
 import type { Product } from './shared';
 
+// =============== LOCAL STATE FOR MODAL ===============
+// Using a local variable to manage image files for the modal form
+// to avoid cluttering the global state.
+let uploadedImages: { file: File, dataUrl: string }[] = [];
+
 // =============== COMPONENT TEMPLATES ===============
 
 const NotificationMenu = (): string => {
@@ -163,12 +168,14 @@ export const CreateListingModal = (): string => `
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Upload Foto (min 1, max 8)</label>
-                         <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                         <div id="image-drop-zone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-yellow-400 transition-colors">
                             <div class="space-y-1 text-center">
                                 <i class="fas fa-image text-4xl text-gray-400"></i>
                                 <p class="text-sm text-gray-600">Drag & drop atau klik untuk upload</p>
                             </div>
                         </div>
+                        <input type="file" id="image-upload-input" multiple accept="image/*" class="hidden">
+                        <div id="image-preview-container" class="mt-4 grid grid-cols-4 gap-4"></div>
                     </div>
                 </div>
                 <div class="flex-shrink-0 p-6 flex justify-end space-x-3 bg-gray-50 border-t">
@@ -203,6 +210,7 @@ function handleOpenModal() {
 }
 
 function handleCloseModal() {
+    uploadedImages = []; // Clear images when modal is closed
     setState({ isModalOpen: false });
 }
 
@@ -222,6 +230,11 @@ function handleCreateListing(event: Event) {
         return;
     }
 
+    if (uploadedImages.length === 0) {
+        showNotification('Silakan upload minimal satu foto produk.');
+        return;
+    }
+
     const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
 
@@ -231,13 +244,14 @@ function handleCreateListing(event: Event) {
         price: Number(formData.get('price')),
         category: formData.get('category') as 'Buku' | 'Elektronik' | 'Jasa' | 'Kost' | 'Makanan',
         condition: formData.get('condition') as 'Baru' | 'Seperti Baru' | 'Bekas',
-        imageUrl: `https://picsum.photos/seed/${Date.now()}/400/300`,
+        imageUrl: uploadedImages[0].dataUrl, // Use the first uploaded image
         seller: { name: state.currentUser.name, faculty: state.currentUser.faculty, isVerified: true },
         description: formData.get('description') as string,
         dateListed: new Date().toISOString().split('T')[0],
     };
     
     setState({ listings: [newListing, ...state.listings], isModalOpen: false });
+    uploadedImages = []; // Clear images after successful submission
 }
 
 function handleToggleNotificationMenu() {
@@ -310,6 +324,85 @@ function handleClearFacultyFilter() {
     setState({ filter: { ...state.filter, faculty: null } });
 }
 
+// ----- IMAGE UPLOAD HANDLERS -----
+
+function renderImagePreviews() {
+    const container = document.getElementById('image-preview-container');
+    if (!container) return;
+    container.innerHTML = uploadedImages.map((img, index) => `
+        <div class="relative group">
+            <img src="${img.dataUrl}" alt="Preview ${index + 1}" class="w-full h-24 object-cover rounded-md">
+            <button data-index="${index}" class="remove-image-btn absolute top-1 right-1 bg-red-600 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+        </div>
+    `).join('');
+}
+
+function processFiles(files: FileList) {
+    const MAX_FILES = 8;
+    const availableSlots = MAX_FILES - uploadedImages.length;
+    if (files.length > availableSlots) {
+        showNotification(`Anda hanya bisa mengupload ${availableSlots} foto lagi.`);
+    }
+
+    Array.from(files).slice(0, availableSlots).forEach(file => {
+        if (!file.type.startsWith('image/')) {
+            showNotification(`File '${file.name}' bukan gambar dan akan dilewati.`);
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            uploadedImages.push({ file, dataUrl: e.target?.result as string });
+            renderImagePreviews();
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function handleImageSelection(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+        processFiles(input.files);
+    }
+}
+
+function handleImageDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    const dropZone = document.getElementById('image-drop-zone');
+    dropZone?.classList.remove('border-yellow-400', 'border-solid');
+    dropZone?.classList.add('border-gray-300', 'border-dashed');
+
+    if (event.dataTransfer?.files) {
+        processFiles(event.dataTransfer.files);
+    }
+}
+
+function handleDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    const dropZone = document.getElementById('image-drop-zone');
+    dropZone?.classList.add('border-yellow-400', 'border-solid');
+    dropZone?.classList.remove('border-gray-300', 'border-dashed');
+}
+
+function handleDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    const dropZone = document.getElementById('image-drop-zone');
+    dropZone?.classList.remove('border-yellow-400', 'border-solid');
+    dropZone?.classList.add('border-gray-300', 'border-dashed');
+}
+
+function handleRemoveImage(event: Event) {
+    const target = event.target as HTMLElement;
+    const button = target.closest('.remove-image-btn');
+    if (button) {
+        const index = parseInt(button.getAttribute('data-index')!, 10);
+        uploadedImages.splice(index, 1);
+        renderImagePreviews();
+    }
+}
+
 
 // =============== EVENT ATTACHMENT ===============
 export function attachHomeEventListeners() {
@@ -348,6 +441,20 @@ export function attachHomeEventListeners() {
         document.getElementById('close-modal-button')?.addEventListener('click', handleCloseModal);
         document.getElementById('cancel-modal-button')?.addEventListener('click', handleCloseModal);
         document.getElementById('create-listing-form')?.addEventListener('submit', handleCreateListing);
+
+        // Image upload listeners
+        const dropZone = document.getElementById('image-drop-zone');
+        const fileInput = document.getElementById('image-upload-input');
+        const previewContainer = document.getElementById('image-preview-container');
+
+        dropZone?.addEventListener('click', () => fileInput?.click());
+        fileInput?.addEventListener('change', handleImageSelection);
+        
+        dropZone?.addEventListener('dragover', handleDragOver);
+        dropZone?.addEventListener('dragleave', handleDragLeave);
+        dropZone?.addEventListener('drop', handleImageDrop);
+
+        previewContainer?.addEventListener('click', handleRemoveImage);
     }
     if (state.isLogoutModalOpen) {
         document.getElementById('logout-modal-backdrop')?.addEventListener('click', (e) => {
