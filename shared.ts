@@ -58,6 +58,8 @@ export interface AppState {
 }
 
 // =============== MOCK DATA & CONSTANTS ===============
+// This initial data is now primarily used for fallback or local testing.
+// The canonical source of truth is the Vercel KV store, managed by `/api/data`.
 export const faculties = ['FASILKOM', 'FISIP', 'FE', 'FT', 'FKIP', 'FMIPA', 'FK', 'FP', 'FH', 'FKM', 'Pascasarjana'];
 
 // Raw data for initialization
@@ -164,30 +166,22 @@ const initialListings: Product[] = rawInitialListingsData.map(listingData => {
     };
 });
 
-// =============== REMOTE DATA PERSISTENCE ===============
-// IMPORTANT: Replace with your actual JSONBin.io API Key and Bin ID.
-// It's recommended to use environment variables for security.
-const JSONBIN_API_KEY = process.env.JSONBIN_API_KEY || '$2a$10$NotARealKey...UseYourOwnGeneratedKey...'; 
-const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID || '66a01234e41b4d34e4123456'; 
 
-const API_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
-const API_HEADERS = {
-    'Content-Type': 'application/json',
-    'X-Master-Key': JSONBIN_API_KEY,
-};
+// =============== REMOTE DATA PERSISTENCE VIA SERVERLESS FUNCTION ===============
+const API_URL = '/api/data'; // Points to the Vercel Serverless Function
 
 async function saveDataToRemote(data: { users: User[], listings: Product[] }) {
     try {
         const response = await fetch(API_URL, {
             method: 'PUT',
-            headers: API_HEADERS,
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
         });
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Failed to save data');
         }
-        console.log('Data saved successfully to remote bin.');
+        console.log('Data saved successfully via API.');
     } catch (error) {
         console.error('Error saving data to remote:', error);
         showNotification('Gagal menyimpan data ke server.', 'error');
@@ -200,31 +194,25 @@ const debouncedSave = debounce(saveDataToRemote, 1000);
 export async function initializeApp() {
     setState({ isLoading: true });
     try {
-        const response = await fetch(`${API_URL}/latest`, { headers: API_HEADERS });
+        const response = await fetch(API_URL);
         if (!response.ok) {
-            // If bin doesn't exist (404) or other error, initialize with mock data
-            if (response.status === 404) {
-                 console.log('Remote bin not found. Initializing with mock data.');
-                 await saveDataToRemote({ users: initialUsers, listings: initialListings });
-                 setState({ users: initialUsers, listings: initialListings, isLoading: false });
-            } else {
-                 throw new Error(`Failed to load data: ${response.statusText}`);
-            }
-        } else {
-            const data = await response.json();
-            setState({
-                users: data.record.users || initialUsers,
-                listings: data.record.listings || initialListings,
-                isLoading: false
-            });
-             console.log('Data loaded successfully from remote bin.');
+            throw new Error(`Failed to load data: ${response.statusText}`);
         }
+        const data = await response.json();
+        setState({
+            users: data.users || initialUsers,
+            listings: data.listings || initialListings,
+            isLoading: false
+        });
+        console.log('Data loaded successfully from API.');
     } catch (error) {
         console.error('Could not initialize app with remote data:', error);
         showNotification('Gagal memuat data. Bekerja dalam mode offline.', 'error');
+        // Fallback to local mock data if API fails
         setState({ users: initialUsers, listings: initialListings, isLoading: false });
     }
 }
+
 
 // =============== APP STATE ===============
 export let state: AppState = {
