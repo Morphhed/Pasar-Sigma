@@ -286,6 +286,10 @@ export function showNotification(message: string, type: 'success' | 'error' = 'e
     if (state.notificationMode === 'on') {
         const audio = document.getElementById('notification-sound') as HTMLAudioElement;
         if (audio) {
+            const isLoginOrRegisterError = type === 'error' && (state.currentView === 'login' || state.currentView === 'register');
+            // The request is to make it "10x louder". Setting loud volume to max (1.0)
+            // and normal volume to 0.1 to create a significant difference.
+            audio.volume = isLoginOrRegisterError ? 1.0 : 0.1;
             audio.currentTime = 0;
             audio.play().catch(e => console.error("Error playing sound:", e));
         }
