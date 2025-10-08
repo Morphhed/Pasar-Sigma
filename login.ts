@@ -101,6 +101,7 @@ function handleSigmaLogin(event: Event) {
         password: 'password123',
         faculty: 'FASILKOM',
         phone: '6281200000001',
+        isVerified: true,
     };
     if (!findUserByName(sigmaUser.name)) {
         state.users.push(sigmaUser);
@@ -150,7 +151,7 @@ function handleRegister(event: Event) {
         return;
     }
 
-    const newUser: User = { name, nim, email, password, faculty, phone };
+    const newUser: User = { name, nim, email, password, faculty, phone, isVerified: false };
     const updatedUsers = [...state.users, newUser];
     
     console.log('Registrasi berhasil untuk:', newUser);

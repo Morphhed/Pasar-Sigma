@@ -246,7 +246,7 @@ function handleCreateListing(event: Event) {
         category: formData.get('category') as 'Buku' | 'Elektronik' | 'Jasa' | 'Kost' | 'Makanan',
         condition: formData.get('condition') as 'Baru' | 'Seperti Baru' | 'Bekas',
         imageUrl: uploadedImages[0].dataUrl, // Use the first uploaded image
-        seller: { name: state.currentUser.name, faculty: state.currentUser.faculty, isVerified: true },
+        seller: { name: state.currentUser.name, faculty: state.currentUser.faculty, isVerified: state.currentUser.isVerified },
         description: formData.get('description') as string,
         dateListed: new Date().toISOString().split('T')[0],
     };

@@ -5,7 +5,7 @@
 import { state, subscribe, initializeApp } from './shared';
 import { LoginView, RegisterView, attachLoginEventListeners } from './login';
 import { HomeView, CreateListingModal, attachHomeEventListeners } from './home';
-import { ProfileView, attachProfileEventListeners } from './profile';
+import { ProfileView, attachProfileEventListeners, VerificationModal } from './profile';
 import { ProductDetailView, NotificationToast, LogoutConfirmationModal } from './shared';
 
 // =============== LOADING VIEW ===============
@@ -53,13 +53,14 @@ function render() {
 
     const modalHtml = state.isModalOpen ? CreateListingModal() : '';
     const logoutModalHtml = state.isLogoutModalOpen ? LogoutConfirmationModal() : '';
+    const verificationModalHtml = state.isVerificationModalOpen ? VerificationModal() : '';
     const notificationsHtml = `
         <div id="notification-container" class="fixed top-4 right-4 z-50 space-y-2 w-full max-w-xs">
             ${state.notifications.map(NotificationToast).join('')}
         </div>
     `;
     
-    root.innerHTML = viewHtml + modalHtml + logoutModalHtml + notificationsHtml;
+    root.innerHTML = viewHtml + modalHtml + logoutModalHtml + verificationModalHtml + notificationsHtml;
     
     attachEventListeners();
 }

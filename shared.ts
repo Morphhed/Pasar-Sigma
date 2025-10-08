@@ -11,6 +11,7 @@ export interface User {
     password: string;
     faculty: string;
     phone: string;
+    isVerified: boolean;
 }
 
 export interface Product {
@@ -42,6 +43,7 @@ export interface AppState {
     previousView: 'home' | 'profile' | null;
     isModalOpen: boolean;
     isLogoutModalOpen: boolean;
+    isVerificationModalOpen: boolean;
     isProfileMenuOpen: boolean;
     listings: Product[];
     filter: {
@@ -152,7 +154,8 @@ const initialUsers: User[] = Array.from(new Set(rawInitialListingsData.map(p => 
             nim: `09011282328${String(index).padStart(3, '0')}`,
             email: `${name.toLowerCase().replace(/\s/g, '')}@unsri.ac.id`,
             password: 'password123',
-            phone: `6281234567${String(index).padStart(3, '0')}`
+            phone: `6281234567${String(index).padStart(3, '0')}`,
+            isVerified: sellerInfo.isVerified
         };
     });
 
@@ -221,6 +224,7 @@ export let state: AppState = {
     previousView: null,
     isModalOpen: false,
     isLogoutModalOpen: false,
+    isVerificationModalOpen: false,
     isProfileMenuOpen: false,
     listings: [],
     filter: { query: '', faculty: null },

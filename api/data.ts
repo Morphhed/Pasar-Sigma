@@ -14,6 +14,7 @@ interface User {
     password: string;
     faculty: string;
     phone: string;
+    isVerified: boolean;
 }
 
 interface Product {
@@ -50,7 +51,7 @@ const initialUsers: User[] = Array.from(new Set(rawInitialListingsData.map(p => 
     .map((name, index) => {
         const sellerInfo = rawInitialListingsData.find(p => p.seller.name === name)!.seller;
         return {
-            name: sellerInfo.name, faculty: sellerInfo.faculty, nim: `09011282328${String(index).padStart(3, '0')}`, email: `${name.toLowerCase().replace(/\s/g, '')}@unsri.ac.id`, password: 'password123', phone: `6281234567${String(index).padStart(3, '0')}`
+            name: sellerInfo.name, faculty: sellerInfo.faculty, nim: `09011282328${String(index).padStart(3, '0')}`, email: `${name.toLowerCase().replace(/\s/g, '')}@unsri.ac.id`, password: 'password123', phone: `6281234567${String(index).padStart(3, '0')}`, isVerified: sellerInfo.isVerified
         };
     });
 
