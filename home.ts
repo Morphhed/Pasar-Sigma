@@ -240,6 +240,7 @@ function handleCreateListing(event: Event) {
 
     const newListing: Product = {
         id: Date.now(),
+        sellerId: state.currentUser.nim,
         title: formData.get('title') as string,
         price: Number(formData.get('price')),
         category: formData.get('category') as 'Buku' | 'Elektronik' | 'Jasa' | 'Kost' | 'Makanan',

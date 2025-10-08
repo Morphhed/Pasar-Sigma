@@ -15,6 +15,7 @@ export interface User {
 
 export interface Product {
     id: number;
+    sellerId: string;
     title: string;
     price: number;
     category: 'Buku' | 'Elektronik' | 'Jasa' | 'Kost' | 'Makanan';
@@ -58,7 +59,8 @@ export interface AppState {
 // =============== MOCK DATA & CONSTANTS ===============
 export const faculties = ['FASILKOM', 'FISIP', 'FE', 'FT', 'FKIP', 'FMIPA', 'FK', 'FP', 'FH', 'FKM', 'Pascasarjana'];
 
-const initialListings: Product[] = [
+// Raw data for initialization
+const rawInitialListingsData = [
     {
         id: 1,
         title: 'Buku Kalkulus Lanjut Edisi 3 - Mulus',
@@ -138,9 +140,10 @@ const initialListings: Product[] = [
     }
 ];
 
-const initialUsers: User[] = Array.from(new Set(initialListings.map(p => p.seller.name)))
+// Generate initial users from the raw listing data
+const initialUsers: User[] = Array.from(new Set(rawInitialListingsData.map(p => p.seller.name)))
     .map((name, index) => {
-        const sellerInfo = initialListings.find(p => p.seller.name === name)!.seller;
+        const sellerInfo = rawInitialListingsData.find(p => p.seller.name === name)!.seller;
         return {
             name: sellerInfo.name,
             faculty: sellerInfo.faculty,
@@ -151,36 +154,58 @@ const initialUsers: User[] = Array.from(new Set(initialListings.map(p => p.selle
         };
     });
 
-const USERS_STORAGE_KEY = 'pasarUnsriUsers';
+// Generate initial listings with sellerId from the users created above
+const initialListings: Product[] = rawInitialListingsData.map(listingData => {
+    const seller = initialUsers.find(u => u.name === listingData.seller.name)!;
+    // Fix: Explicitly cast category and condition to match the Product type.
+    // TypeScript was inferring them as `string`, which is too wide for the specific literal types.
+    return {
+        ...listingData,
+        category: listingData.category as Product['category'],
+        condition: listingData.condition as Product['condition'],
+        sellerId: seller.nim,
+    };
+});
 
-function saveUsersToStorage(users: User[]) {
+
+// =============== DATA PERSISTENCE ===============
+const USERS_STORAGE_KEY = 'pasarUnsriUsers';
+const LISTINGS_STORAGE_KEY = 'pasarUnsriListings';
+
+function saveToStorage<T>(key: string, data: T) {
     try {
-        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+        localStorage.setItem(key, JSON.stringify(data));
     } catch (e) {
-        console.error("Failed to save users to localStorage", e);
+        console.error(`Failed to save to localStorage key "${key}"`, e);
     }
 }
 
-function loadUsersFromStorage(): User[] | null {
+function loadFromStorage<T>(key: string): T | null {
     try {
-        const usersJson = localStorage.getItem(USERS_STORAGE_KEY);
-        if (usersJson) {
-            return JSON.parse(usersJson);
+        const json = localStorage.getItem(key);
+        if (json) {
+            return JSON.parse(json) as T;
         }
         return null;
     } catch (e) {
-        console.error("Failed to load or parse users from localStorage", e);
-        // Clear corrupted data
-        localStorage.removeItem(USERS_STORAGE_KEY);
+        console.error(`Failed to load or parse from localStorage key "${key}"`, e);
+        localStorage.removeItem(key); // Clear corrupted data
         return null;
     }
 }
 
 // Initialize users from storage, or use mock data and persist it.
-const persistedUsers = loadUsersFromStorage();
+const persistedUsers = loadFromStorage<User[]>(USERS_STORAGE_KEY);
 const initialUsersData = persistedUsers || initialUsers;
 if (!persistedUsers) {
-    saveUsersToStorage(initialUsersData);
+    saveToStorage(USERS_STORAGE_KEY, initialUsersData);
+}
+
+// Initialize listings from storage, or use mock data and persist it.
+const persistedListings = loadFromStorage<Product[]>(LISTINGS_STORAGE_KEY);
+const initialListingsData = persistedListings || initialListings;
+if (!persistedListings) {
+    saveToStorage(LISTINGS_STORAGE_KEY, initialListingsData);
 }
 
 // =============== APP STATE ===============
@@ -190,7 +215,7 @@ export let state: AppState = {
     isModalOpen: false,
     isLogoutModalOpen: false,
     isProfileMenuOpen: false,
-    listings: initialListings,
+    listings: initialListingsData,
     filter: { query: '', faculty: null },
     users: initialUsersData,
     currentUser: null,
@@ -211,8 +236,13 @@ export function subscribe(callback: () => void) {
 export function setState(newState: Partial<AppState>) {
     // If the users array is being updated, save it to localStorage.
     if (newState.users) {
-        saveUsersToStorage(newState.users);
+        saveToStorage(USERS_STORAGE_KEY, newState.users);
     }
+    // If the listings array is being updated, save it to localStorage.
+    if (newState.listings) {
+        saveToStorage(LISTINGS_STORAGE_KEY, newState.listings);
+    }
+
     Object.assign(state, newState);
     renderCallback();
 }

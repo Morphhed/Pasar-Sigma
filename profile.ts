@@ -12,7 +12,7 @@ export const ProfileView = (): string => {
     const user = state.viewingProfileOf;
     if (!user) return `<p>Pengguna tidak ditemukan.</p>`;
 
-    const userProducts = state.listings.filter(p => p.seller.name === user.name);
+    const userProducts = state.listings.filter(p => p.sellerId === user.nim);
     
     return `
     <div class="min-h-screen bg-gray-100">
