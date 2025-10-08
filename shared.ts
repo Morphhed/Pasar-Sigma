@@ -37,6 +37,7 @@ export interface AppNotification {
 }
 
 export interface AppState {
+    isLoading: boolean;
     currentView: 'login' | 'register' | 'home' | 'profile' | 'productDetail';
     previousView: 'home' | 'profile' | null;
     isModalOpen: boolean;
@@ -140,25 +141,21 @@ const rawInitialListingsData = [
     }
 ];
 
-// Generate initial users from the raw listing data
 const initialUsers: User[] = Array.from(new Set(rawInitialListingsData.map(p => p.seller.name)))
     .map((name, index) => {
         const sellerInfo = rawInitialListingsData.find(p => p.seller.name === name)!.seller;
         return {
             name: sellerInfo.name,
             faculty: sellerInfo.faculty,
-            nim: `09011282328${String(index).padStart(3, '0')}`, // Mock NIM
+            nim: `09011282328${String(index).padStart(3, '0')}`,
             email: `${name.toLowerCase().replace(/\s/g, '')}@unsri.ac.id`,
             password: 'password123',
-            phone: `6281234567${String(index).padStart(3, '0')}` // Mock Phone
+            phone: `6281234567${String(index).padStart(3, '0')}`
         };
     });
 
-// Generate initial listings with sellerId from the users created above
 const initialListings: Product[] = rawInitialListingsData.map(listingData => {
     const seller = initialUsers.find(u => u.name === listingData.seller.name)!;
-    // Fix: Explicitly cast category and condition to match the Product type.
-    // TypeScript was inferring them as `string`, which is too wide for the specific literal types.
     return {
         ...listingData,
         category: listingData.category as Product['category'],
@@ -167,57 +164,79 @@ const initialListings: Product[] = rawInitialListingsData.map(listingData => {
     };
 });
 
+// =============== REMOTE DATA PERSISTENCE ===============
+// IMPORTANT: Replace with your actual JSONBin.io API Key and Bin ID.
+// It's recommended to use environment variables for security.
+const JSONBIN_API_KEY = process.env.JSONBIN_API_KEY || '$2a$10$NotARealKey...UseYourOwnGeneratedKey...'; 
+const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID || '66a01234e41b4d34e4123456'; 
 
-// =============== DATA PERSISTENCE ===============
-const USERS_STORAGE_KEY = 'pasarUnsriUsers';
-const LISTINGS_STORAGE_KEY = 'pasarUnsriListings';
+const API_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+const API_HEADERS = {
+    'Content-Type': 'application/json',
+    'X-Master-Key': JSONBIN_API_KEY,
+};
 
-function saveToStorage<T>(key: string, data: T) {
+async function saveDataToRemote(data: { users: User[], listings: Product[] }) {
     try {
-        localStorage.setItem(key, JSON.stringify(data));
-    } catch (e) {
-        console.error(`Failed to save to localStorage key "${key}"`, e);
-    }
-}
-
-function loadFromStorage<T>(key: string): T | null {
-    try {
-        const json = localStorage.getItem(key);
-        if (json) {
-            return JSON.parse(json) as T;
+        const response = await fetch(API_URL, {
+            method: 'PUT',
+            headers: API_HEADERS,
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to save data');
         }
-        return null;
-    } catch (e) {
-        console.error(`Failed to load or parse from localStorage key "${key}"`, e);
-        localStorage.removeItem(key); // Clear corrupted data
-        return null;
+        console.log('Data saved successfully to remote bin.');
+    } catch (error) {
+        console.error('Error saving data to remote:', error);
+        showNotification('Gagal menyimpan data ke server.', 'error');
     }
 }
 
-// Initialize users from storage, or use mock data and persist it.
-const persistedUsers = loadFromStorage<User[]>(USERS_STORAGE_KEY);
-const initialUsersData = persistedUsers || initialUsers;
-if (!persistedUsers) {
-    saveToStorage(USERS_STORAGE_KEY, initialUsersData);
-}
+// Debounce the save function to avoid excessive API calls
+const debouncedSave = debounce(saveDataToRemote, 1000);
 
-// Initialize listings from storage, or use mock data and persist it.
-const persistedListings = loadFromStorage<Product[]>(LISTINGS_STORAGE_KEY);
-const initialListingsData = persistedListings || initialListings;
-if (!persistedListings) {
-    saveToStorage(LISTINGS_STORAGE_KEY, initialListingsData);
+export async function initializeApp() {
+    setState({ isLoading: true });
+    try {
+        const response = await fetch(`${API_URL}/latest`, { headers: API_HEADERS });
+        if (!response.ok) {
+            // If bin doesn't exist (404) or other error, initialize with mock data
+            if (response.status === 404) {
+                 console.log('Remote bin not found. Initializing with mock data.');
+                 await saveDataToRemote({ users: initialUsers, listings: initialListings });
+                 setState({ users: initialUsers, listings: initialListings, isLoading: false });
+            } else {
+                 throw new Error(`Failed to load data: ${response.statusText}`);
+            }
+        } else {
+            const data = await response.json();
+            setState({
+                users: data.record.users || initialUsers,
+                listings: data.record.listings || initialListings,
+                isLoading: false
+            });
+             console.log('Data loaded successfully from remote bin.');
+        }
+    } catch (error) {
+        console.error('Could not initialize app with remote data:', error);
+        showNotification('Gagal memuat data. Bekerja dalam mode offline.', 'error');
+        setState({ users: initialUsers, listings: initialListings, isLoading: false });
+    }
 }
 
 // =============== APP STATE ===============
 export let state: AppState = {
+    isLoading: true,
     currentView: 'login',
     previousView: null,
     isModalOpen: false,
     isLogoutModalOpen: false,
     isProfileMenuOpen: false,
-    listings: initialListingsData,
+    listings: [],
     filter: { query: '', faculty: null },
-    users: initialUsersData,
+    users: [],
     currentUser: null,
     viewingProfileOf: null,
     viewingProduct: null,
@@ -234,16 +253,16 @@ export function subscribe(callback: () => void) {
 }
 
 export function setState(newState: Partial<AppState>) {
-    // If the users array is being updated, save it to localStorage.
-    if (newState.users) {
-        saveToStorage(USERS_STORAGE_KEY, newState.users);
-    }
-    // If the listings array is being updated, save it to localStorage.
-    if (newState.listings) {
-        saveToStorage(LISTINGS_STORAGE_KEY, newState.listings);
+    const shouldSave = newState.users || newState.listings;
+    
+    Object.assign(state, newState);
+
+    // If users or listings data has changed, save the entire dataset to the remote bin.
+    if (shouldSave) {
+        // We pass the fully updated state to ensure the debounced function has the latest data.
+        debouncedSave({ users: state.users, listings: state.listings });
     }
 
-    Object.assign(state, newState);
     renderCallback();
 }
 

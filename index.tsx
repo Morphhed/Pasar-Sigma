@@ -2,17 +2,33 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { state, subscribe } from './shared';
+import { state, subscribe, initializeApp } from './shared';
 import { LoginView, RegisterView, attachLoginEventListeners } from './login';
 import { HomeView, CreateListingModal, attachHomeEventListeners } from './home';
 import { ProfileView, attachProfileEventListeners } from './profile';
 import { ProductDetailView, NotificationToast, LogoutConfirmationModal } from './shared';
+
+// =============== LOADING VIEW ===============
+const LoadingView = (): string => `
+    <div class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="flex flex-col items-center">
+            <i class="fas fa-spinner fa-spin text-5xl text-yellow-500"></i>
+            <p class="mt-4 text-gray-600">Memuat data...</p>
+        </div>
+    </div>
+`;
+
 
 // =============== MAIN RENDER FUNCTION ===============
 function render() {
     const root = document.getElementById('root');
     if (!root) {
         console.error('Root element not found!');
+        return;
+    }
+
+    if (state.isLoading) {
+        root.innerHTML = LoadingView();
         return;
     }
 
@@ -73,4 +89,4 @@ function attachEventListeners() {
 
 // Initial App Load
 subscribe(render); // Subscribe the render function to state changes
-render();
+initializeApp(); // Start the app by loading remote data
