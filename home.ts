@@ -5,10 +5,12 @@
 import { state, setState, showNotification, formatRupiah, debounce, ProductCard, findUserByName } from './shared';
 import type { Product } from './shared';
 
-// =============== LOCAL STATE FOR MODAL ===============
-// Using a local variable to manage image files for the modal form
+// =============== LOCAL STATE FOR MODALS ===============
+// Using local variables to manage image files for modal forms
 // to avoid cluttering the global state.
 let uploadedImages: { file: File, dataUrl: string }[] = [];
+let adminEditingImage: { file: File, dataUrl: string } | null = null;
+
 
 // =============== COMPONENT TEMPLATES ===============
 
@@ -37,8 +39,8 @@ const ProfileMenu = (): string => `
     <div id="profile-menu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-20">
         <div class="py-1" role="menu" aria-orientation="vertical">
             <a href="#" id="view-profile-btn" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
-                <i class="fas fa-user-circle w-5 mr-3 text-gray-500"></i>
-                <span>Cek Profil</span>
+                <i class="fas ${state.currentUser?.isAdmin ? 'fa-user-shield' : 'fa-user-circle'} w-5 mr-3 text-gray-500"></i>
+                <span>${state.currentUser?.isAdmin ? 'Panel Admin' : 'Cek Profil'}</span>
             </a>
             <a href="#" id="logout-btn" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
                  <i class="fas fa-sign-out-alt w-5 mr-3 text-gray-500"></i>
@@ -69,6 +71,7 @@ const HomeHeader = (): string => {
                     <div class="relative">
                         <div id="user-profile-menu-toggle" class="flex items-center space-x-2 cursor-pointer group">
                             <span class="font-semibold text-gray-700 group-hover:text-yellow-500">${state.currentUser?.name}</span>
+                            ${state.currentUser?.isAdmin ? '<i class="fas fa-user-shield text-red-500 text-xs" title="Super Admin"></i>' : ''}
                             <i class="fas fa-chevron-down text-xs text-gray-600 group-hover:text-yellow-500 transition-transform ${state.isProfileMenuOpen ? 'rotate-180' : ''}"></i>
                         </div>
                         ${state.isProfileMenuOpen ? ProfileMenu() : ''}
@@ -249,6 +252,7 @@ function handleCreateListing(event: Event) {
         seller: { name: state.currentUser.name, faculty: state.currentUser.faculty, isVerified: state.currentUser.isVerified },
         description: formData.get('description') as string,
         dateListed: new Date().toISOString().split('T')[0],
+        isFlagged: false,
     };
     
     setState({ listings: [newListing, ...state.listings], isModalOpen: false });
@@ -284,9 +288,136 @@ function handleGoBackFromDetail() {
     setState({ currentView: state.previousView || 'home', viewingProduct: null, previousView: null });
 }
 
+// ----- ADMIN ACTION HANDLERS -----
+
+function handleOpenAdminDeleteModal(productId: number) {
+    setState({ isDeleteConfirmationOpen: true, deletingProductId: productId });
+}
+
+function handleConfirmAdminDelete() {
+    if (state.deletingProductId === null) return;
+    const updatedListings = state.listings.filter(p => p.id !== state.deletingProductId);
+    setState({ 
+        listings: updatedListings, 
+        isDeleteConfirmationOpen: false, 
+        deletingProductId: null 
+    });
+    showNotification('Listing berhasil dihapus.', 'success');
+}
+
+function handleCancelAdminDelete() {
+    setState({ isDeleteConfirmationOpen: false, deletingProductId: null });
+}
+
+function handleToggleFlag(productId: number) {
+    const updatedListings = state.listings.map(p => {
+        if (p.id === productId) {
+            return { ...p, isFlagged: !p.isFlagged };
+        }
+        return p;
+    });
+    setState({ listings: updatedListings });
+    const product = state.listings.find(p => p.id === productId);
+    showNotification(`Listing ${product?.isFlagged ? 'ditandai' : 'tidak ditandai'}.`, 'success');
+}
+
+function handleOpenAdminEditModal(productId: number) {
+    const product = state.listings.find(p => p.id === productId);
+    if (product) {
+        setState({ isEditModalOpen: true, editingProduct: product });
+    }
+}
+
+function handleCloseAdminEditModal() {
+    adminEditingImage = null;
+    setState({ isEditModalOpen: false, editingProduct: null });
+}
+
+function handleAdminTriggerImageUpload() {
+    document.getElementById('admin-image-upload-input')?.click();
+}
+
+function handleAdminImageSelection(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        if (!file.type.startsWith('image/')) {
+            showNotification(`File yang dipilih bukan gambar.`);
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const dataUrl = e.target?.result as string;
+            adminEditingImage = { file, dataUrl };
+            
+            const previewEl = document.getElementById('admin-edit-image-preview') as HTMLImageElement;
+            if (previewEl) {
+                previewEl.src = dataUrl;
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function handleAdminUpdateListing(event: Event) {
+    event.preventDefault();
+    if (!state.editingProduct) return;
+
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+
+    const updatedProduct: Product = {
+        ...state.editingProduct,
+        title: formData.get('title') as string,
+        price: Number(formData.get('price')),
+        description: formData.get('description') as string,
+        imageUrl: adminEditingImage ? adminEditingImage.dataUrl : state.editingProduct.imageUrl,
+    };
+
+    const updatedListings = state.listings.map(p => p.id === updatedProduct.id ? updatedProduct : p);
+    
+    adminEditingImage = null;
+
+    setState({
+        listings: updatedListings,
+        isEditModalOpen: false,
+        editingProduct: null,
+    });
+    showNotification('Listing berhasil diperbarui.', 'success');
+}
+
+
 function handleProductGridClick(event: Event) {
     const target = event.target as HTMLElement;
 
+    // Admin buttons
+    const editBtn = target.closest<HTMLElement>('[data-admin-edit-id]');
+    if (editBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        const productId = Number(editBtn.dataset.adminEditId);
+        handleOpenAdminEditModal(productId);
+        return;
+    }
+    const flagBtn = target.closest<HTMLElement>('[data-admin-flag-id]');
+    if (flagBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        const productId = Number(flagBtn.dataset.adminFlagId);
+        handleToggleFlag(productId);
+        return;
+    }
+    const deleteBtn = target.closest<HTMLElement>('[data-admin-delete-id]');
+    if (deleteBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        const productId = Number(deleteBtn.dataset.adminDeleteId);
+        handleOpenAdminDeleteModal(productId);
+        return;
+    }
+
+
+    // Regular user actions
     const sellerName = target.closest<HTMLElement>('[data-seller-name]')?.dataset.sellerName;
     const faculty = target.closest<HTMLElement>('[data-faculty]')?.dataset.faculty;
 
@@ -415,13 +546,13 @@ export function attachHomeEventListeners() {
     // Page-specific listeners
     document.getElementById('search-input')?.addEventListener('input', handleSearch);
     document.getElementById('product-grid')?.addEventListener('click', handleProductGridClick);
+    // Use querySelector for product detail admin buttons as the grid is not always present
+    document.querySelector('.container')?.addEventListener('click', handleProductGridClick);
     document.getElementById('sell-button')?.addEventListener('click', handleOpenModal);
     document.getElementById('clear-faculty-filter')?.addEventListener('click', handleClearFacultyFilter);
 
     // Detail page listeners
     document.getElementById('back-from-detail')?.addEventListener('click', handleGoBackFromDetail);
-    document.querySelector('[data-seller-name]')?.addEventListener('click', handleProductGridClick);
-    document.querySelector('[data-faculty]')?.addEventListener('click', handleProductGridClick);
     
     // Menu listeners
     if (state.isNotificationMenuOpen) {
@@ -463,5 +594,22 @@ export function attachHomeEventListeners() {
         });
         document.getElementById('cancel-logout-button')?.addEventListener('click', handleCancelLogout);
         document.getElementById('confirm-logout-button')?.addEventListener('click', handleConfirmLogout);
+    }
+    if (state.isDeleteConfirmationOpen) {
+        document.getElementById('admin-delete-modal-backdrop')?.addEventListener('click', (e) => {
+             if (e.target === document.getElementById('admin-delete-modal-backdrop')) handleCancelAdminDelete();
+        });
+        document.getElementById('cancel-admin-delete-button')?.addEventListener('click', handleCancelAdminDelete);
+        document.getElementById('confirm-admin-delete-button')?.addEventListener('click', handleConfirmAdminDelete);
+    }
+    if (state.isEditModalOpen) {
+        document.getElementById('edit-modal-backdrop')?.addEventListener('click', (e) => {
+             if (e.target === document.getElementById('edit-modal-backdrop')) handleCloseAdminEditModal();
+        });
+        document.getElementById('close-edit-modal-button')?.addEventListener('click', handleCloseAdminEditModal);
+        document.getElementById('cancel-edit-modal-button')?.addEventListener('click', handleCloseAdminEditModal);
+        document.getElementById('admin-edit-listing-form')?.addEventListener('submit', handleAdminUpdateListing);
+        document.getElementById('admin-change-image-button')?.addEventListener('click', handleAdminTriggerImageUpload);
+        document.getElementById('admin-image-upload-input')?.addEventListener('change', handleAdminImageSelection);
     }
 }

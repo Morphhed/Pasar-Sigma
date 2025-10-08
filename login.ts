@@ -82,6 +82,24 @@ function handleLogin(event: Event) {
     const nim = formData.get('nim') as string;
     const password = formData.get('password') as string;
 
+    // Special hardcoded admin login
+    if (nim.toLowerCase() === 'super diddy' && password === '123') {
+        const adminUser: User = {
+            name: 'Super Diddy',
+            nim: 'superadmin',
+            email: 'admin@pasarnsri.dev',
+            password: '', // Don't store plain password in state
+            faculty: 'Administration',
+            phone: 'N/A',
+            isVerified: true,
+            isAdmin: true,
+        };
+        console.log('Admin login successful');
+        showNotification(`Selamat datang, ${adminUser.name}!`, 'success');
+        setState({ currentUser: adminUser, currentView: 'home' });
+        return;
+    }
+
     const user = state.users.find(u => u.nim === nim);
 
     if (user && user.password === password) {

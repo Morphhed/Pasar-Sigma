@@ -12,6 +12,7 @@ export interface User {
     faculty: string;
     phone: string;
     isVerified: boolean;
+    isAdmin?: boolean;
 }
 
 export interface Product {
@@ -29,6 +30,7 @@ export interface Product {
     };
     description: string;
     dateListed: string;
+    isFlagged?: boolean;
 }
 
 export interface AppNotification {
@@ -45,6 +47,10 @@ export interface AppState {
     isLogoutModalOpen: boolean;
     isVerificationModalOpen: boolean;
     isProfileMenuOpen: boolean;
+    isEditModalOpen: boolean;
+    editingProduct: Product | null;
+    isDeleteConfirmationOpen: boolean;
+    deletingProductId: number | null;
     listings: Product[];
     filter: {
         query: string;
@@ -155,7 +161,8 @@ const initialUsers: User[] = Array.from(new Set(rawInitialListingsData.map(p => 
             email: `${name.toLowerCase().replace(/\s/g, '')}@unsri.ac.id`,
             password: 'password123',
             phone: `6281234567${String(index).padStart(3, '0')}`,
-            isVerified: sellerInfo.isVerified
+            isVerified: sellerInfo.isVerified,
+            isAdmin: false,
         };
     });
 
@@ -166,6 +173,7 @@ const initialListings: Product[] = rawInitialListingsData.map(listingData => {
         category: listingData.category as Product['category'],
         condition: listingData.condition as Product['condition'],
         sellerId: seller.nim,
+        isFlagged: false,
     };
 });
 
@@ -226,6 +234,10 @@ export let state: AppState = {
     isLogoutModalOpen: false,
     isVerificationModalOpen: false,
     isProfileMenuOpen: false,
+    isEditModalOpen: false,
+    editingProduct: null,
+    isDeleteConfirmationOpen: false,
+    deletingProductId: null,
     listings: [],
     filter: { query: '', faculty: null },
     users: [],
@@ -336,8 +348,13 @@ export const NotificationToast = (notification: AppNotification): string => {
     `;
 }
 
-export const ProductCard = (product: Product): string => `
-    <div data-product-id="${product.id}" class="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 flex flex-col cursor-pointer">
+export const ProductCard = (product: Product): string => {
+    const isAdmin = state.currentUser?.isAdmin;
+    const isFlagged = product.isFlagged;
+
+    return `
+    <div data-product-id="${product.id}" class="relative bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 flex flex-col cursor-pointer ${isFlagged ? 'ring-2 ring-red-500' : ''}">
+        ${isFlagged ? `<div class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10 flex items-center"><i class="fas fa-flag mr-1.5"></i>Di-flag</div>` : ''}
         <img src="${product.imageUrl}" alt="${product.title}" class="w-full h-40 object-cover pointer-events-none">
         <div class="p-4 flex-grow flex flex-col pointer-events-none">
             <span class="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full self-start">${product.category}</span>
@@ -354,8 +371,16 @@ export const ProductCard = (product: Product): string => `
                  <a href="#" class="hover:underline" data-faculty="${product.seller.faculty}">${product.seller.faculty}</a>
             </div>
         </div>
+        ${isAdmin ? `
+            <div class="flex-shrink-0 bg-gray-50 p-2 flex justify-around items-center border-t">
+                <button data-admin-edit-id="${product.id}" class="text-sm text-blue-600 hover:text-blue-800 transition" title="Edit Listing"><i class="fas fa-edit mr-1"></i>Edit</button>
+                <button data-admin-flag-id="${product.id}" class="text-sm ${isFlagged ? 'text-yellow-600 hover:text-yellow-800' : 'text-gray-600 hover:text-gray-900'} transition" title="${isFlagged ? 'Un-flag Listing' : 'Flag Listing'}"><i class="fas fa-flag mr-1"></i>${isFlagged ? 'Un-flag' : 'Flag'}</button>
+                <button data-admin-delete-id="${product.id}" class="text-sm text-red-600 hover:text-red-800 transition" title="Hapus Listing"><i class="fas fa-trash mr-1"></i>Hapus</button>
+            </div>
+        ` : ''}
     </div>
-`;
+    `;
+};
 
 
 export const ProductDetailView = (): string => {
@@ -364,12 +389,27 @@ export const ProductDetailView = (): string => {
 
     const seller = findUserByName(product.seller.name);
     const whatsappLink = seller ? `https://wa.me/${seller.phone}?text=Halo, saya tertarik dengan produk '${product.title}' di Pasar UNSRI.` : '#';
+    const isAdmin = state.currentUser?.isAdmin;
+    const isFlagged = product.isFlagged;
 
     return `
     <div class="min-h-screen bg-gray-100">
         <!-- Header will be rendered by home.ts -->
         <main class="container mx-auto p-4">
             <button id="back-from-detail" class="mb-4 text-sm text-red-600 hover:underline"><i class="fas fa-arrow-left mr-2"></i>Kembali</button>
+            
+            ${isFlagged ? `
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-4" role="alert">
+                <div class="flex">
+                    <div class="py-1"><i class="fas fa-flag fa-lg mr-4"></i></div>
+                    <div>
+                        <p class="font-bold">Listing Ini Di-flag</p>
+                        <p class="text-sm">Listing ini sedang dalam peninjauan oleh administrator.</p>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
                 <div class="md:flex">
                     <div class="md:w-1/2">
@@ -403,6 +443,17 @@ export const ProductDetailView = (): string => {
 
                         <h3 class="font-semibold text-gray-800 mb-2">Deskripsi</h3>
                         <p class="text-gray-600 text-sm whitespace-pre-wrap flex-grow">${product.description}</p>
+
+                        ${isAdmin ? `
+                        <div class="border-t mt-auto pt-4">
+                            <h4 class="font-bold text-gray-700 mb-2">Panel Admin</h4>
+                             <div class="flex justify-start space-x-3">
+                                <button data-admin-edit-id="${product.id}" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition text-sm"><i class="fas fa-edit mr-2"></i>Edit</button>
+                                <button data-admin-flag-id="${product.id}" class="bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition text-sm"><i class="fas fa-flag mr-2"></i>${isFlagged ? 'Un-flag' : 'Flag'}</button>
+                                <button data-admin-delete-id="${product.id}" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition text-sm"><i class="fas fa-trash mr-2"></i>Hapus</button>
+                            </div>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
             </div>
@@ -427,3 +478,66 @@ export const LogoutConfirmationModal = (): string => `
         </div>
     </div>
 `;
+
+export const AdminDeleteConfirmationModal = (): string => `
+    <div id="admin-delete-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-60 z-40 modal-enter">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div id="admin-delete-modal-content" class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center modal-content-enter">
+                <i class="fas fa-exclamation-triangle text-5xl text-red-500 mb-4"></i>
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Konfirmasi Hapus</h2>
+                <p class="text-gray-600 mb-6">Anda akan menghapus listing ini secara permanen. Tindakan ini tidak dapat diurungkan.</p>
+                <div class="flex justify-center space-x-4">
+                    <button id="cancel-admin-delete-button" class="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300 transition">Batal</button>
+                    <button id="confirm-admin-delete-button" class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition">Ya, Hapus</button>
+                </div>
+            </div>
+        </div>
+    </div>
+`;
+
+export const AdminEditModal = (): string => {
+    const product = state.editingProduct;
+    if (!product) return '';
+    return `
+    <div id="edit-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-60 z-40 modal-enter">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <form id="admin-edit-listing-form" class="bg-white rounded-lg shadow-xl w-full max-w-lg relative modal-content-enter flex flex-col max-h-[90vh]">
+                <div class="flex-shrink-0 p-6 border-b flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-gray-800">Edit Listing (Admin)</h2>
+                    <button type="button" id="close-edit-modal-button" class="text-gray-500 hover:text-gray-800">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+                <div class="overflow-y-auto p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Judul</label>
+                        <input type="text" name="title" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" value="${product.title}" required maxlength="120">
+                    </div>
+                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Harga (Rp)</label>
+                        <input type="number" name="price" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" value="${product.price}" required min="1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                        <textarea name="description" rows="6" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required minlength="30">${product.description}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Gambar Produk</label>
+                        <div class="mt-1 relative group">
+                            <img id="admin-edit-image-preview" src="${product.imageUrl}" alt="Product image preview" class="w-full h-48 object-cover rounded-md bg-gray-100">
+                            <button type="button" id="admin-change-image-button" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-bold opacity-0 group-hover:opacity-100 transition-opacity rounded-md cursor-pointer">
+                                <i class="fas fa-camera mr-2"></i> Ganti Gambar
+                            </button>
+                            <input type="file" id="admin-image-upload-input" accept="image/*" class="hidden">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-shrink-0 p-6 flex justify-end space-x-3 bg-gray-50 border-t">
+                    <button type="button" id="cancel-edit-modal-button" class="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300">Batal</button>
+                    <button type="submit" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    `;
+};

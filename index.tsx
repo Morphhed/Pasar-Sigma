@@ -6,7 +6,7 @@ import { state, subscribe, initializeApp } from './shared';
 import { LoginView, RegisterView, attachLoginEventListeners } from './login';
 import { HomeView, CreateListingModal, attachHomeEventListeners } from './home';
 import { ProfileView, attachProfileEventListeners, VerificationModal } from './profile';
-import { ProductDetailView, NotificationToast, LogoutConfirmationModal } from './shared';
+import { ProductDetailView, NotificationToast, LogoutConfirmationModal, AdminDeleteConfirmationModal, AdminEditModal } from './shared';
 
 // =============== LOADING VIEW ===============
 const LoadingView = (): string => `
@@ -54,13 +54,15 @@ function render() {
     const modalHtml = state.isModalOpen ? CreateListingModal() : '';
     const logoutModalHtml = state.isLogoutModalOpen ? LogoutConfirmationModal() : '';
     const verificationModalHtml = state.isVerificationModalOpen ? VerificationModal() : '';
+    const editModalHtml = state.isEditModalOpen ? AdminEditModal() : '';
+    const deleteModalHtml = state.isDeleteConfirmationOpen ? AdminDeleteConfirmationModal() : '';
     const notificationsHtml = `
         <div id="notification-container" class="fixed top-4 right-4 z-50 space-y-2 w-full max-w-xs">
             ${state.notifications.map(NotificationToast).join('')}
         </div>
     `;
     
-    root.innerHTML = viewHtml + modalHtml + logoutModalHtml + verificationModalHtml + notificationsHtml;
+    root.innerHTML = viewHtml + modalHtml + logoutModalHtml + verificationModalHtml + editModalHtml + deleteModalHtml + notificationsHtml;
     
     attachEventListeners();
 }

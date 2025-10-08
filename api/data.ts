@@ -15,6 +15,7 @@ interface User {
     faculty: string;
     phone: string;
     isVerified: boolean;
+    isAdmin?: boolean;
 }
 
 interface Product {
@@ -32,6 +33,7 @@ interface Product {
     };
     description: string;
     dateListed: string;
+    isFlagged?: boolean;
 }
 
 // Raw data for initialization if the database is empty
@@ -51,14 +53,14 @@ const initialUsers: User[] = Array.from(new Set(rawInitialListingsData.map(p => 
     .map((name, index) => {
         const sellerInfo = rawInitialListingsData.find(p => p.seller.name === name)!.seller;
         return {
-            name: sellerInfo.name, faculty: sellerInfo.faculty, nim: `09011282328${String(index).padStart(3, '0')}`, email: `${name.toLowerCase().replace(/\s/g, '')}@unsri.ac.id`, password: 'password123', phone: `6281234567${String(index).padStart(3, '0')}`, isVerified: sellerInfo.isVerified
+            name: sellerInfo.name, faculty: sellerInfo.faculty, nim: `09011282328${String(index).padStart(3, '0')}`, email: `${name.toLowerCase().replace(/\s/g, '')}@unsri.ac.id`, password: 'password123', phone: `6281234567${String(index).padStart(3, '0')}`, isVerified: sellerInfo.isVerified, isAdmin: false
         };
     });
 
 const initialListings: Product[] = rawInitialListingsData.map(listingData => {
     const seller = initialUsers.find(u => u.name === listingData.seller.name)!;
     return {
-        ...listingData, category: listingData.category as Product['category'], condition: listingData.condition as Product['condition'], sellerId: seller.nim,
+        ...listingData, category: listingData.category as Product['category'], condition: listingData.condition as Product['condition'], sellerId: seller.nim, isFlagged: false
     };
 });
 
