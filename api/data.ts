@@ -34,18 +34,22 @@ interface Product {
     description: string;
     dateListed: string;
     isFlagged?: boolean;
+    location: 'Kampus Indralaya' | 'Kampus Bukit';
 }
 
 // Raw data for initialization if the database is empty
 const rawInitialListingsData = [
     {
-        id: 1, title: 'Buku Kalkulus Lanjut Edisi 3 - Mulus', price: 150000, category: 'Buku', condition: 'Seperti Baru', imageUrl: 'https://picsum.photos/seed/kalkulus/400/300', seller: { name: 'Andi Pratama', faculty: 'FASILKOM', isVerified: true }, description: 'Buku kalkulus edisi ketiga, kondisi sangat baik seperti baru, tidak ada coretan. Cocok untuk mahasiswa semester awal. Bonus sampul plastik.', dateListed: '2024-05-20',
+        id: 1, title: 'Buku Kalkulus Lanjut Edisi 3 - Mulus', price: 150000, category: 'Buku', condition: 'Seperti Baru', imageUrl: 'https://picsum.photos/seed/kalkulus/400/300', seller: { name: 'Andi Pratama', faculty: 'FASILKOM', isVerified: true }, description: 'Buku kalkulus edisi ketiga, kondisi sangat baik seperti baru, tidak ada coretan. Cocok untuk mahasiswa semester awal. Bonus sampul plastik.', dateListed: '2024-05-20', location: 'Kampus Bukit',
     },
     {
-        id: 2, title: 'Jasa Desain Grafis (Poster, Logo)', price: 200000, category: 'Jasa', condition: 'Baru', imageUrl: 'https://picsum.photos/seed/desain/400/300', seller: { name: 'Citra Lestari', faculty: 'FISIP', isVerified: true }, description: 'Menerima jasa desain grafis untuk keperluan acara, tugas, atau bisnis. Pengerjaan cepat dan bisa revisi. Hubungi untuk portofolio.', dateListed: '2024-05-19',
+        id: 2, title: 'Jasa Desain Grafis (Poster, Logo)', price: 200000, category: 'Jasa', condition: 'Baru', imageUrl: 'https://picsum.photos/seed/desain/400/300', seller: { name: 'Citra Lestari', faculty: 'FISIP', isVerified: true }, description: 'Menerima jasa desain grafis untuk keperluan acara, tugas, atau bisnis. Pengerjaan cepat dan bisa revisi. Hubungi untuk portofolio.', dateListed: '2024-05-19', location: 'Kampus Bukit',
     },
     {
-        id: 3, title: 'Disewakan Kamar Kost Dekat Unsri Bukit', price: 800000, category: 'Kost', condition: 'Baru', imageUrl: 'https://picsum.photos/seed/kost/400/300', seller: { name: 'Budi Santoso', faculty: 'FE', isVerified: false }, description: 'Kamar kost nyaman, fasilitas lengkap (AC, kamar mandi dalam, kasur, lemari). Lokasi strategis hanya 5 menit dari kampus Unsri Bukit Besar.', dateListed: '2024-05-18',
+        id: 3, title: 'Disewakan Kamar Kost Dekat Unsri Bukit', price: 800000, category: 'Kost', condition: 'Baru', imageUrl: 'https://picsum.photos/seed/kost/400/300', seller: { name: 'Budi Santoso', faculty: 'FE', isVerified: false }, description: 'Kamar kost nyaman, fasilitas lengkap (AC, kamar mandi dalam, kasur, lemari). Lokasi strategis hanya 5 menit dari kampus Unsri Bukit Besar.', dateListed: '2024-05-18', location: 'Kampus Bukit',
+    },
+    {
+        id: 4, title: 'Mouse Gaming Logitech G102', price: 250000, category: 'Elektronik', condition: 'Bekas', imageUrl: 'https://picsum.photos/seed/mouse/400/300', seller: { name: 'Rina Wijaya', faculty: 'FT', isVerified: true }, description: 'Mouse gaming second, pemakaian 6 bulan, kondisi 95% normal, klik empuk, RGB nyala. Alasan jual karena sudah upgrade.', dateListed: '2024-05-21', location: 'Kampus Indralaya',
     }
 ];
 
@@ -60,7 +64,12 @@ const initialUsers: User[] = Array.from(new Set(rawInitialListingsData.map(p => 
 const initialListings: Product[] = rawInitialListingsData.map(listingData => {
     const seller = initialUsers.find(u => u.name === listingData.seller.name)!;
     return {
-        ...listingData, category: listingData.category as Product['category'], condition: listingData.condition as Product['condition'], sellerId: seller.nim, isFlagged: false
+        ...listingData,
+        category: listingData.category as Product['category'],
+        condition: listingData.condition as Product['condition'],
+        location: listingData.location as Product['location'],
+        sellerId: seller.nim,
+        isFlagged: false
     };
 });
 

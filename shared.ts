@@ -31,6 +31,7 @@ export interface Product {
     description: string;
     dateListed: string;
     isFlagged?: boolean;
+    location: 'Kampus Indralaya' | 'Kampus Bukit';
 }
 
 export interface AppNotification {
@@ -55,6 +56,7 @@ export interface AppState {
     filter: {
         query: string;
         faculty: string | null;
+        location: 'Kampus Indralaya' | 'Kampus Bukit' | null;
     };
     users: User[];
     currentUser: User | null;
@@ -82,6 +84,7 @@ const rawInitialListingsData = [
         seller: { name: 'Andi Pratama', faculty: 'FASILKOM', isVerified: true },
         description: 'Buku kalkulus edisi ketiga, kondisi sangat baik seperti baru, tidak ada coretan. Cocok untuk mahasiswa semester awal. Bonus sampul plastik.',
         dateListed: '2024-05-20',
+        location: 'Kampus Bukit',
     },
     {
         id: 2,
@@ -93,6 +96,7 @@ const rawInitialListingsData = [
         seller: { name: 'Citra Lestari', faculty: 'FISIP', isVerified: true },
         description: 'Menerima jasa desain grafis untuk keperluan acara, tugas, atau bisnis. Pengerjaan cepat dan bisa revisi. Hubungi untuk portofolio.',
         dateListed: '2024-05-19',
+        location: 'Kampus Bukit',
     },
     {
         id: 3,
@@ -104,6 +108,7 @@ const rawInitialListingsData = [
         seller: { name: 'Budi Santoso', faculty: 'FE', isVerified: false },
         description: 'Kamar kost nyaman, fasilitas lengkap (AC, kamar mandi dalam, kasur, lemari). Lokasi strategis hanya 5 menit dari kampus Unsri Bukit Besar.',
         dateListed: '2024-05-18',
+        location: 'Kampus Bukit',
     },
     {
         id: 4,
@@ -115,6 +120,7 @@ const rawInitialListingsData = [
         seller: { name: 'Rina Wijaya', faculty: 'FT', isVerified: true },
         description: 'Mouse gaming second, pemakaian 6 bulan, kondisi 95% normal, klik empuk, RGB nyala. Alasan jual karena sudah upgrade.',
         dateListed: '2024-05-21',
+        location: 'Kampus Indralaya',
     },
      {
         id: 5,
@@ -126,6 +132,7 @@ const rawInitialListingsData = [
         seller: { name: 'Sari Murni', faculty: 'FKIP', isVerified: true },
         description: 'Open PO pempek kapal selam asli ikan tenggiri. Cuko kental dan pedas mantap. Dibuat setiap hari berdasarkan pesanan.',
         dateListed: '2024-05-22',
+        location: 'Kampus Indralaya',
     },
     {
         id: 6,
@@ -137,6 +144,7 @@ const rawInitialListingsData = [
         seller: { name: 'Eko Nugroho', faculty: 'FMIPA', isVerified: true },
         description: 'Modul praktikum Kimia Dasar lengkap untuk 1 semester. Ada sedikit catatan tapi masih sangat layak pakai. Halaman lengkap.',
         dateListed: '2024-05-17',
+        location: 'Kampus Indralaya',
     },
     {
         id: 7,
@@ -148,6 +156,7 @@ const rawInitialListingsData = [
         seller: { name: 'Andi Pratama', faculty: 'FASILKOM', isVerified: true },
         description: 'Macbook Air M1 2020 8/256GB Silver. Garansi habis. Fisik mulus 99% no dent. Cycle Count rendah. Fullset original.',
         dateListed: '2024-05-22',
+        location: 'Kampus Bukit',
     }
 ];
 
@@ -172,6 +181,7 @@ const initialListings: Product[] = rawInitialListingsData.map(listingData => {
         ...listingData,
         category: listingData.category as Product['category'],
         condition: listingData.condition as Product['condition'],
+        location: listingData.location as Product['location'],
         sellerId: seller.nim,
         isFlagged: false,
     };
@@ -239,7 +249,7 @@ export let state: AppState = {
     isDeleteConfirmationOpen: false,
     deletingProductId: null,
     listings: [],
-    filter: { query: '', faculty: null },
+    filter: { query: '', faculty: null, location: null },
     users: [],
     currentUser: null,
     viewingProfileOf: null,
@@ -370,6 +380,10 @@ export const ProductCard = (product: Product): string => {
             <div class="text-xs text-gray-500 mt-1 pointer-events-auto">
                  <a href="#" class="hover:underline" data-faculty="${product.seller.faculty}">${product.seller.faculty}</a>
             </div>
+            <div class="text-xs text-gray-500 mt-2 flex items-center pointer-events-none">
+                <i class="fas fa-map-marker-alt mr-1.5 text-gray-400"></i>
+                <span class="font-medium">${product.location}</span>
+            </div>
         </div>
         ${isAdmin ? `
             <div class="flex-shrink-0 bg-gray-50 p-2 flex justify-around items-center border-t">
@@ -437,6 +451,7 @@ export const ProductDetailView = (): string => {
                         <div class="space-y-2 text-sm text-gray-700">
                             <p><strong>Kondisi:</strong> ${product.condition}</p>
                             <p><strong>Tanggal Terbit:</strong> ${formatDate(product.dateListed)}</p>
+                            <p><strong>Lokasi:</strong> ${product.location}</p>
                         </div>
                         
                         <div class="border-t my-4"></div>
@@ -512,6 +527,13 @@ export const AdminEditModal = (): string => {
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Judul</label>
                         <input type="text" name="title" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" value="${product.title}" required maxlength="120">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Lokasi</label>
+                         <select name="location" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                            <option value="Kampus Indralaya" ${product.location === 'Kampus Indralaya' ? 'selected' : ''}>Kampus Indralaya</option>
+                            <option value="Kampus Bukit" ${product.location === 'Kampus Bukit' ? 'selected' : ''}>Kampus Bukit</option>
+                        </select>
                     </div>
                      <div>
                         <label class="block text-sm font-medium text-gray-700">Harga (Rp)</label>

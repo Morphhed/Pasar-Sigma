@@ -79,10 +79,17 @@ const HomeHeader = (): string => {
                 </div>
             </div>
             ${state.currentView !== 'productDetail' ? `
-            <div class="container mx-auto px-4 pb-3">
+            <div class="container mx-auto px-4 pb-3 border-t border-gray-200 pt-3">
                  <div class="relative">
                     <input id="search-input" type="text" placeholder="Cari buku, jasa, atau kost..." class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" value="${state.filter.query}">
                     <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <div class="mt-3 flex items-center justify-start">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm font-medium text-gray-600"><i class="fas fa-map-marker-alt mr-2 text-gray-500"></i>Filter Lokasi:</span>
+                        <button data-location-filter="Kampus Indralaya" class="px-3 py-1 text-sm rounded-full ${state.filter.location === 'Kampus Indralaya' ? 'bg-red-600 text-white font-bold shadow' : 'bg-gray-200 text-gray-700'} hover:bg-red-500 hover:text-white transition">Indralaya</button>
+                        <button data-location-filter="Kampus Bukit" class="px-3 py-1 text-sm rounded-full ${state.filter.location === 'Kampus Bukit' ? 'bg-red-600 text-white font-bold shadow' : 'bg-gray-200 text-gray-700'} hover:bg-red-500 hover:text-white transition">Bukit</button>
+                    </div>
                 </div>
             </div>
             ` : ''}
@@ -93,7 +100,8 @@ const HomeHeader = (): string => {
 export const HomeView = (): string => {
     const filteredListings = state.listings
         .filter(p => p.title.toLowerCase().includes(state.filter.query.toLowerCase()))
-        .filter(p => state.filter.faculty ? p.seller.faculty === state.filter.faculty : true);
+        .filter(p => state.filter.faculty ? p.seller.faculty === state.filter.faculty : true)
+        .filter(p => state.filter.location ? p.location === state.filter.location : true);
 
     return `
     <div class="min-h-screen bg-gray-100">
@@ -103,6 +111,13 @@ export const HomeView = (): string => {
                 <div class="flex justify-between items-center bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-2 rounded-lg mb-4">
                     <span>Menampilkan produk dari <strong>${state.filter.faculty}</strong></span>
                     <button id="clear-faculty-filter" class="font-bold hover:underline">Hapus Filter &times;</button>
+                </div>
+            ` : ''}
+            
+            ${state.filter.location ? `
+                <div class="flex justify-between items-center bg-red-100 border border-red-300 text-red-800 px-4 py-2 rounded-lg mb-4">
+                    <span>Menampilkan produk dari area <strong>${state.filter.location}</strong></span>
+                    <button id="clear-location-filter" class="font-bold hover:underline">Hapus Filter &times;</button>
                 </div>
             ` : ''}
 
@@ -133,6 +148,20 @@ export const CreateListingModal = (): string => `
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Judul (maks 120 karakter)</label>
                         <input type="text" name="title" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500" required maxlength="120">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Lokasi Penjual</label>
+                        <p class="text-xs text-gray-500">Pilih lokasi utama Anda (Indralaya atau Bukit)</p>
+                        <div class="mt-2 flex items-center space-x-6">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="location" value="Kampus Indralaya" class="focus:ring-yellow-500 h-4 w-4 text-yellow-600 border-gray-300" required>
+                                <span class="ml-2 text-sm text-gray-700">Kampus Indralaya</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="location" value="Kampus Bukit" class="focus:ring-yellow-500 h-4 w-4 text-yellow-600 border-gray-300" required>
+                                <span class="ml-2 text-sm text-gray-700">Kampus Bukit</span>
+                            </label>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Kategori</label>
@@ -232,19 +261,25 @@ function handleCreateListing(event: Event) {
         showNotification('Anda harus login untuk membuat listing.');
         return;
     }
+    
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
 
     if (uploadedImages.length === 0) {
         showNotification('Silakan upload minimal satu foto produk.');
         return;
     }
-
-    const form = event.target as HTMLFormElement;
-    const formData = new FormData(form);
+    
+    if (!formData.get('location')) {
+        showNotification('Silakan pilih lokasi penjual.');
+        return;
+    }
 
     const newListing: Product = {
         id: Date.now(),
         sellerId: state.currentUser.nim,
         title: formData.get('title') as string,
+        location: formData.get('location') as 'Kampus Indralaya' | 'Kampus Bukit',
         price: Number(formData.get('price')),
         category: formData.get('category') as 'Buku' | 'Elektronik' | 'Jasa' | 'Kost' | 'Makanan',
         condition: formData.get('condition') as 'Baru' | 'Seperti Baru' | 'Bekas',
@@ -281,7 +316,7 @@ function handleViewOwnProfile() {
 }
 
 function handleGoBackHome() {
-    setState({ currentView: 'home', viewingProfileOf: null, filter: { ...state.filter, faculty: null } });
+    setState({ currentView: 'home', viewingProfileOf: null, filter: { query: '', faculty: null, location: null } });
 }
 
 function handleGoBackFromDetail() {
@@ -372,6 +407,7 @@ function handleAdminUpdateListing(event: Event) {
         price: Number(formData.get('price')),
         description: formData.get('description') as string,
         imageUrl: adminEditingImage ? adminEditingImage.dataUrl : state.editingProduct.imageUrl,
+        location: formData.get('location') as 'Kampus Indralaya' | 'Kampus Bukit',
     };
 
     const updatedListings = state.listings.map(p => p.id === updatedProduct.id ? updatedProduct : p);
@@ -455,6 +491,24 @@ function handleProductGridClick(event: Event) {
 function handleClearFacultyFilter() {
     setState({ filter: { ...state.filter, faculty: null } });
 }
+
+function handleLocationFilterClick(event: Event) {
+    const target = event.target as HTMLElement;
+    const button = target.closest<HTMLElement>('[data-location-filter]');
+    if (button) {
+        const location = button.dataset.locationFilter as 'Kampus Indralaya' | 'Kampus Bukit';
+        if (state.filter.location === location) {
+            setState({ filter: { ...state.filter, location: null } });
+        } else {
+            setState({ filter: { ...state.filter, location } });
+        }
+    }
+}
+
+function handleClearLocationFilter() {
+     setState({ filter: { ...state.filter, location: null } });
+}
+
 
 // ----- IMAGE UPLOAD HANDLERS -----
 
@@ -542,6 +596,8 @@ export function attachHomeEventListeners() {
     document.getElementById('home-logo')?.addEventListener('click', handleGoBackHome);
     document.getElementById('notification-bell-icon')?.addEventListener('click', handleToggleNotificationMenu);
     document.getElementById('user-profile-menu-toggle')?.addEventListener('click', handleToggleProfileMenu);
+    document.querySelector('header')?.addEventListener('click', handleLocationFilterClick);
+
 
     // Page-specific listeners
     document.getElementById('search-input')?.addEventListener('input', handleSearch);
@@ -550,6 +606,7 @@ export function attachHomeEventListeners() {
     document.querySelector('.container')?.addEventListener('click', handleProductGridClick);
     document.getElementById('sell-button')?.addEventListener('click', handleOpenModal);
     document.getElementById('clear-faculty-filter')?.addEventListener('click', handleClearFacultyFilter);
+    document.getElementById('clear-location-filter')?.addEventListener('click', handleClearLocationFilter);
 
     // Detail page listeners
     document.getElementById('back-from-detail')?.addEventListener('click', handleGoBackFromDetail);
