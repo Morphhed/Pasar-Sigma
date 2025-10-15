@@ -18,6 +18,17 @@ const LoadingView = (): string => `
     </div>
 `;
 
+// =============== ERROR FLASH VIEW ===============
+const ErrorFlashView = (): string => {
+    // This element is always in the DOM for a smooth fade-out transition.
+    // CSS classes, driven by the state, control its visibility and interactivity.
+    return `
+        <div 
+            class="fixed inset-0 bg-white z-[9999] transition-opacity duration-700 ease-out ${state.isErrorFlashActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}"
+        ></div>
+    `;
+};
+
 
 // =============== MAIN RENDER FUNCTION ===============
 function render() {
@@ -57,13 +68,14 @@ function render() {
     const filterModalHtml = state.isFilterModalOpen ? FilterModal() : '';
     const editModalHtml = state.isEditModalOpen ? AdminEditModal() : '';
     const deleteModalHtml = state.isDeleteConfirmationOpen ? AdminDeleteConfirmationModal() : '';
+    const errorFlashHtml = ErrorFlashView();
     const notificationsHtml = `
         <div id="notification-container" class="fixed top-4 right-4 z-50 space-y-2 w-full max-w-xs">
             ${state.notifications.map(NotificationToast).join('')}
         </div>
     `;
     
-    root.innerHTML = viewHtml + modalHtml + logoutModalHtml + verificationModalHtml + filterModalHtml + editModalHtml + deleteModalHtml + notificationsHtml;
+    root.innerHTML = errorFlashHtml + viewHtml + modalHtml + logoutModalHtml + verificationModalHtml + filterModalHtml + editModalHtml + deleteModalHtml + notificationsHtml;
     
     attachEventListeners();
 }

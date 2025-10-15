@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { state, setState, showNotification, findUserByName, faculties } from './shared';
+import { state, setState, showNotification, findUserByName, faculties, triggerErrorFlash } from './shared';
 import type { User } from './shared';
 
 // =============== COMPONENT TEMPLATES ===============
@@ -107,6 +107,7 @@ function handleLogin(event: Event) {
         setState({ currentUser: user, currentView: 'home' });
     } else {
         showNotification('NIM atau password salah. Coba lagi.');
+        triggerErrorFlash();
     }
 }
 
@@ -151,21 +152,25 @@ function handleRegister(event: Event) {
 
     if (!name || !email || !nim || !password || !faculty || !phone) {
         showNotification('Semua kolom wajib diisi.');
+        triggerErrorFlash();
         return;
     }
     
     if (state.users.some(u => u.nim === nim)) {
         showNotification('NIM ini sudah terdaftar. Silakan login.');
+        triggerErrorFlash();
         return;
     }
 
     if (!email.toLowerCase().endsWith('@unsri.ac.id')) {
         showNotification('Pendaftaran wajib menggunakan email @unsri.ac.id.');
+        triggerErrorFlash();
         return;
     }
 
     if (password.length < 10) {
         showNotification('Password harus memiliki minimal 10 karakter.');
+        triggerErrorFlash();
         return;
     }
 

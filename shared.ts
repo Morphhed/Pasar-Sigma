@@ -69,6 +69,7 @@ export interface AppState {
     notifications: AppNotification[];
     notificationMode: 'on' | 'muted' | 'off';
     isNotificationMenuOpen: boolean;
+    isErrorFlashActive: boolean;
 }
 
 // =============== MOCK DATA & CONSTANTS ===============
@@ -262,6 +263,7 @@ export let state: AppState = {
     notifications: [],
     notificationMode: 'on',
     isNotificationMenuOpen: false,
+    isErrorFlashActive: false,
 };
 
 // =============== STATE MANAGEMENT ===============
@@ -332,6 +334,13 @@ export function showNotification(message: string, type: 'success' | 'error' = 'e
             notifications: state.notifications.filter(n => n.id !== id)
         });
     }, duration);
+}
+
+export function triggerErrorFlash() {
+    setState({ isErrorFlashActive: true });
+    setTimeout(() => {
+        setState({ isErrorFlashActive: false });
+    }, 2000); // Duration of the flash before fading starts
 }
 
 export function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
