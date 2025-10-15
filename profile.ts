@@ -40,14 +40,14 @@ export const ProfileView = (): string => {
     <div class="min-h-screen bg-gray-100">
         <!-- Header is rendered by HomeView -->
         <main class="container mx-auto p-4">
-            <button id="back-to-home" class="mb-4 text-sm text-red-600 hover:underline"><i class="fas fa-arrow-left mr-2"></i>Kembali ke Beranda</button>
+            <button id="back-to-home" class="mb-4 text-sm text-green-600 hover:underline"><i class="fas fa-arrow-left mr-2"></i>Kembali ke Beranda</button>
             <div class="bg-white p-6 rounded-lg shadow-md mb-6">
                  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start">
                     <div>
                         <h2 class="text-3xl font-bold text-gray-800">${user.name}</h2>
                         <p class="text-gray-600">${user.faculty}</p>
                         ${user.isVerified ? `
-                            <span class="inline-flex items-center bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full mt-2">
+                            <span class="inline-flex items-center bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full mt-2">
                                 <i class="fas fa-check-circle mr-1"></i>
                                 Penjual Terverifikasi
                             </span>

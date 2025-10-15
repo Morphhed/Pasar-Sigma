@@ -27,7 +27,7 @@ const NotificationMenu = (): string => {
                     <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ${state.notificationMode === option.mode ? 'bg-gray-100 font-semibold' : ''}" role="menuitem" data-mode="${option.mode}">
                         <i class="fas ${option.icon} w-5 mr-3 text-gray-500"></i>
                         <span>${option.text}</span>
-                        ${state.notificationMode === option.mode ? '<i class="fas fa-check text-red-500 ml-auto"></i>' : ''}
+                        ${state.notificationMode === option.mode ? '<i class="fas fa-check text-green-500 ml-auto"></i>' : ''}
                     </a>
                 `).join('')}
             </div>
@@ -71,7 +71,7 @@ const HomeHeader = (): string => {
                     <div class="relative">
                         <div id="user-profile-menu-toggle" class="flex items-center space-x-2 cursor-pointer group">
                             <span class="font-semibold text-gray-700 group-hover:text-yellow-500">${state.currentUser?.name}</span>
-                            ${state.currentUser?.isAdmin ? '<i class="fas fa-user-shield text-red-500 text-xs" title="Super Admin"></i>' : ''}
+                            ${state.currentUser?.isAdmin ? '<i class="fas fa-user-shield text-green-500 text-xs" title="Super Admin"></i>' : ''}
                             <i class="fas fa-chevron-down text-xs text-gray-600 group-hover:text-yellow-500 transition-transform ${state.isProfileMenuOpen ? 'rotate-180' : ''}"></i>
                         </div>
                         ${state.isProfileMenuOpen ? ProfileMenu() : ''}
@@ -87,8 +87,8 @@ const HomeHeader = (): string => {
                 <div class="mt-3 flex items-center justify-start">
                     <div class="flex items-center space-x-2">
                         <span class="text-sm font-medium text-gray-600"><i class="fas fa-map-marker-alt mr-2 text-gray-500"></i>Filter Lokasi:</span>
-                        <button data-location-filter="Kampus Indralaya" class="px-3 py-1 text-sm rounded-full ${state.filter.location === 'Kampus Indralaya' ? 'bg-red-600 text-white font-bold shadow' : 'bg-gray-200 text-gray-700'} hover:bg-red-500 hover:text-white transition">Indralaya</button>
-                        <button data-location-filter="Kampus Bukit" class="px-3 py-1 text-sm rounded-full ${state.filter.location === 'Kampus Bukit' ? 'bg-red-600 text-white font-bold shadow' : 'bg-gray-200 text-gray-700'} hover:bg-red-500 hover:text-white transition">Bukit</button>
+                        <button data-location-filter="Kampus Indralaya" class="px-3 py-1 text-sm rounded-full ${state.filter.location === 'Kampus Indralaya' ? 'bg-green-600 text-white font-bold shadow' : 'bg-gray-200 text-gray-700'} hover:bg-green-500 hover:text-white transition">Indralaya</button>
+                        <button data-location-filter="Kampus Bukit" class="px-3 py-1 text-sm rounded-full ${state.filter.location === 'Kampus Bukit' ? 'bg-green-600 text-white font-bold shadow' : 'bg-gray-200 text-gray-700'} hover:bg-green-500 hover:text-white transition">Bukit</button>
                     </div>
                 </div>
             </div>
@@ -115,7 +115,7 @@ export const HomeView = (): string => {
             ` : ''}
             
             ${state.filter.location ? `
-                <div class="flex justify-between items-center bg-red-100 border border-red-300 text-red-800 px-4 py-2 rounded-lg mb-4">
+                <div class="flex justify-between items-center bg-green-100 border border-green-300 text-green-800 px-4 py-2 rounded-lg mb-4">
                     <span>Menampilkan produk dari area <strong>${state.filter.location}</strong></span>
                     <button id="clear-location-filter" class="font-bold hover:underline">Hapus Filter &times;</button>
                 </div>
@@ -238,7 +238,12 @@ function handleCancelLogout() {
 }
 
 function handleOpenModal() {
-    setState({ isModalOpen: true });
+    if (state.currentUser && !state.currentUser.isVerified) {
+        showNotification('Akun Anda belum terverifikasi. Silakan verifikasi di halaman profil untuk mulai menjual.', 'error');
+        setState({ currentView: 'profile', viewingProfileOf: state.currentUser });
+    } else {
+        setState({ isModalOpen: true });
+    }
 }
 
 function handleCloseModal() {

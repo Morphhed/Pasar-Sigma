@@ -373,7 +373,7 @@ export const ProductCard = (product: Product): string => {
             <div class="flex items-center mt-3 text-sm text-gray-600 pointer-events-auto">
                 <a href="#" class="hover:underline" data-seller-name="${product.seller.name}">${product.seller.name}</a>
                 ${product.seller.isVerified 
-                    ? '<i class="fas fa-check-circle text-red-500 ml-1" title="Terverifikasi"></i>' 
+                    ? '<i class="fas fa-check-circle text-green-500 ml-1" title="Terverifikasi"></i>' 
                     : ''
                 }
             </div>
@@ -410,7 +410,7 @@ export const ProductDetailView = (): string => {
     <div class="min-h-screen bg-gray-100">
         <!-- Header will be rendered by home.ts -->
         <main class="container mx-auto p-4">
-            <button id="back-from-detail" class="mb-4 text-sm text-red-600 hover:underline"><i class="fas fa-arrow-left mr-2"></i>Kembali</button>
+            <button id="back-from-detail" class="mb-4 text-sm text-green-600 hover:underline"><i class="fas fa-arrow-left mr-2"></i>Kembali</button>
             
             ${isFlagged ? `
             <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-4" role="alert">
@@ -437,12 +437,12 @@ export const ProductDetailView = (): string => {
                         <div class="flex items-center text-sm text-gray-600 mb-4 pointer-events-auto">
                             Dijual oleh 
                             <a href="#" class="font-semibold hover:underline ml-1" data-seller-name="${product.seller.name}">${product.seller.name}</a>
-                            ${product.seller.isVerified ? '<i class="fas fa-check-circle text-red-500 ml-1" title="Terverifikasi"></i>' : ''}
+                            ${product.seller.isVerified ? '<i class="fas fa-check-circle text-green-500 ml-1" title="Terverifikasi"></i>' : ''}
                             <span class="mx-2">|</span>
                              <a href="#" class="hover:underline" data-faculty="${product.seller.faculty}">${product.seller.faculty}</a>
                         </div>
                         
-                        <a href="${whatsappLink}" target="_blank" rel="noopener noreferrer" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg text-center hover:bg-red-700 transition duration-300 flex items-center justify-center">
+                        <a href="${whatsappLink}" target="_blank" rel="noopener noreferrer" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg text-center hover:bg-green-700 transition duration-300 flex items-center justify-center">
                             <i class="fab fa-whatsapp mr-2"></i>Hubungi Penjual
                         </a>
 
@@ -482,12 +482,12 @@ export const LogoutConfirmationModal = (): string => `
     <div id="logout-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-60 z-40 modal-enter">
         <div class="flex items-center justify-center min-h-screen p-4">
             <div id="logout-modal-content" class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center modal-content-enter">
-                <i class="fas fa-question-circle text-5xl text-red-500 mb-4"></i>
+                <i class="fas fa-question-circle text-5xl text-yellow-500 mb-4"></i>
                 <h2 class="text-xl font-bold text-gray-800 mb-2">Konfirmasi Keluar</h2>
                 <p class="text-gray-600 mb-6">Apakah Anda yakin ingin keluar dari akun Anda?</p>
                 <div class="flex justify-center space-x-4">
                     <button id="cancel-logout-button" class="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300 transition">Batal</button>
-                    <button id="confirm-logout-button" class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition">Ya, Keluar</button>
+                    <button id="confirm-logout-button" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition">Ya, Keluar</button>
                 </div>
             </div>
         </div>
