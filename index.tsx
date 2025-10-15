@@ -4,7 +4,7 @@
 */
 import { state, subscribe, initializeApp } from './shared';
 import { LoginView, RegisterView, attachLoginEventListeners } from './login';
-import { HomeView, CreateListingModal, attachHomeEventListeners } from './home';
+import { HomeView, CreateListingModal, attachHomeEventListeners, FilterModal } from './home';
 import { ProfileView, attachProfileEventListeners, VerificationModal } from './profile';
 import { ProductDetailView, NotificationToast, LogoutConfirmationModal, AdminDeleteConfirmationModal, AdminEditModal } from './shared';
 
@@ -54,6 +54,7 @@ function render() {
     const modalHtml = state.isModalOpen ? CreateListingModal() : '';
     const logoutModalHtml = state.isLogoutModalOpen ? LogoutConfirmationModal() : '';
     const verificationModalHtml = state.isVerificationModalOpen ? VerificationModal() : '';
+    const filterModalHtml = state.isFilterModalOpen ? FilterModal() : '';
     const editModalHtml = state.isEditModalOpen ? AdminEditModal() : '';
     const deleteModalHtml = state.isDeleteConfirmationOpen ? AdminDeleteConfirmationModal() : '';
     const notificationsHtml = `
@@ -62,7 +63,7 @@ function render() {
         </div>
     `;
     
-    root.innerHTML = viewHtml + modalHtml + logoutModalHtml + verificationModalHtml + editModalHtml + deleteModalHtml + notificationsHtml;
+    root.innerHTML = viewHtml + modalHtml + logoutModalHtml + verificationModalHtml + filterModalHtml + editModalHtml + deleteModalHtml + notificationsHtml;
     
     attachEventListeners();
 }

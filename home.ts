@@ -14,6 +14,66 @@ let adminEditingImage: { file: File, dataUrl: string } | null = null;
 
 // =============== COMPONENT TEMPLATES ===============
 
+export const FilterModal = (): string => {
+    const conditions: ('Baru' | 'Seperti Baru' | 'Bekas')[] = ['Baru', 'Seperti Baru', 'Bekas'];
+
+    return `
+    <div id="filter-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-60 z-40 modal-enter">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <form id="filter-form" class="bg-white rounded-lg shadow-xl w-full max-w-md relative modal-content-enter flex flex-col max-h-[90vh]">
+                <div class="flex-shrink-0 p-6 border-b flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-gray-800">Filter Pencarian</h2>
+                    <button type="button" id="close-filter-modal-button" class="text-gray-500 hover:text-gray-800">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+                <div class="overflow-y-auto p-6 space-y-6">
+                    <!-- Lokasi -->
+                    <div>
+                        <label class="block text-lg font-semibold text-gray-700 mb-3">Lokasi</label>
+                        <div class="flex items-center space-x-6">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="location" value="Kampus Indralaya" class="focus:ring-yellow-500 h-4 w-4 text-yellow-600 border-gray-300" ${state.filter.location === 'Kampus Indralaya' ? 'checked' : ''}>
+                                <span class="ml-2 text-sm text-gray-700">Kampus Indralaya</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="location" value="Kampus Bukit" class="focus:ring-yellow-500 h-4 w-4 text-yellow-600 border-gray-300" ${state.filter.location === 'Kampus Bukit' ? 'checked' : ''}>
+                                <span class="ml-2 text-sm text-gray-700">Kampus Bukit</span>
+                            </label>
+                        </div>
+                    </div>
+                    <!-- Kondisi -->
+                    <div>
+                        <label class="block text-lg font-semibold text-gray-700 mb-3">Kondisi Barang</label>
+                        <div class="space-y-2">
+                        ${conditions.map(condition => `
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" name="condition" value="${condition}" class="focus:ring-yellow-500 h-4 w-4 text-yellow-600 border-gray-300 rounded" ${state.filter.conditions.includes(condition) ? 'checked' : ''}>
+                                <span class="ml-3 text-sm text-gray-700">${condition}</span>
+                            </label>
+                        `).join('')}
+                        </div>
+                    </div>
+                    <!-- Jangkauan Harga -->
+                    <div>
+                         <label class="block text-lg font-semibold text-gray-700 mb-3">Jangkauan Harga (Rp)</label>
+                         <div class="flex items-center space-x-2">
+                            <input type="number" name="minPrice" placeholder="Harga Minimum" class="w-full p-2 border border-gray-300 rounded-md" value="${state.filter.minPrice || ''}" min="0">
+                            <span class="text-gray-500">-</span>
+                            <input type="number" name="maxPrice" placeholder="Harga Maksimum" class="w-full p-2 border border-gray-300 rounded-md" value="${state.filter.maxPrice || ''}" min="0">
+                         </div>
+                    </div>
+                </div>
+                <div class="flex-shrink-0 p-6 flex justify-between items-center bg-gray-50 border-t">
+                    <button type="button" id="reset-filters-button" class="text-gray-600 font-bold py-2 px-6 rounded-lg hover:underline">Hapus Semua Filter</button>
+                    <button type="submit" class="bg-yellow-500 text-gray-900 font-bold py-2 px-6 rounded-lg hover:bg-yellow-400">Terapkan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    `;
+};
+
 const NotificationMenu = (): string => {
     const options = [
         { mode: 'on', icon: 'fa-bell', text: 'Hidupkan Notifikasi' },
@@ -59,6 +119,13 @@ const HomeHeader = (): string => {
             default: return 'fa-bell';
         }
     };
+    const activeFilterCount =
+        (state.filter.location ? 1 : 0) +
+        state.filter.conditions.length +
+        (state.filter.minPrice ? 1 : 0) +
+        (state.filter.maxPrice ? 1 : 0) +
+        (state.filter.faculty ? 1 : 0);
+
     return `
         <header class="bg-white shadow-md sticky top-0 z-10">
             <div class="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -78,30 +145,33 @@ const HomeHeader = (): string => {
                     </div>
                 </div>
             </div>
-            ${state.currentView !== 'productDetail' ? `
             <div class="container mx-auto px-4 pb-3 border-t border-gray-200 pt-3">
-                 <div class="relative">
-                    <input id="search-input" type="text" placeholder="Cari buku, jasa, atau kost..." class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" value="${state.filter.query}">
-                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </div>
-                <div class="mt-3 flex items-center justify-start">
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm font-medium text-gray-600"><i class="fas fa-map-marker-alt mr-2 text-gray-500"></i>Filter Lokasi:</span>
-                        <button data-location-filter="Kampus Indralaya" class="px-3 py-1 text-sm rounded-full ${state.filter.location === 'Kampus Indralaya' ? 'bg-green-600 text-white font-bold shadow' : 'bg-gray-200 text-gray-700'} hover:bg-green-500 hover:text-white transition">Indralaya</button>
-                        <button data-location-filter="Kampus Bukit" class="px-3 py-1 text-sm rounded-full ${state.filter.location === 'Kampus Bukit' ? 'bg-green-600 text-white font-bold shadow' : 'bg-gray-200 text-gray-700'} hover:bg-green-500 hover:text-white transition">Bukit</button>
+                 <div class="flex items-center space-x-2">
+                    <div class="relative flex-grow">
+                        <input id="search-input" type="text" placeholder="Cari buku, jasa, atau kost..." class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" value="${state.filter.query}">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     </div>
+                    <button id="open-filter-modal-button" class="relative flex-shrink-0 px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-200 transition">
+                        <i class="fas fa-filter mr-2"></i>
+                        <span>Filter</span>
+                        ${activeFilterCount > 0 ? `<span class="absolute -top-2 -right-2 bg-green-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">${activeFilterCount}</span>` : ''}
+                    </button>
                 </div>
             </div>
-            ` : ''}
         </header>
     `;
 }
 
 export const HomeView = (): string => {
+    const { query, faculty, location, conditions, minPrice, maxPrice } = state.filter;
     const filteredListings = state.listings
-        .filter(p => p.title.toLowerCase().includes(state.filter.query.toLowerCase()))
-        .filter(p => state.filter.faculty ? p.seller.faculty === state.filter.faculty : true)
-        .filter(p => state.filter.location ? p.location === state.filter.location : true);
+        .filter(p => p.title.toLowerCase().includes(query.toLowerCase()))
+        .filter(p => faculty ? p.seller.faculty === faculty : true)
+        .filter(p => location ? p.location === location : true)
+        .filter(p => conditions.length > 0 ? conditions.includes(p.condition) : true)
+        .filter(p => minPrice !== null ? p.price >= minPrice : true)
+        .filter(p => maxPrice !== null ? p.price <= maxPrice : true);
+
 
     return `
     <div class="min-h-screen bg-gray-100">
@@ -321,12 +391,64 @@ function handleViewOwnProfile() {
 }
 
 function handleGoBackHome() {
-    setState({ currentView: 'home', viewingProfileOf: null, filter: { query: '', faculty: null, location: null } });
+    setState({ currentView: 'home', viewingProfileOf: null, filter: { query: '', faculty: null, location: null, conditions: [], minPrice: null, maxPrice: null } });
 }
 
 function handleGoBackFromDetail() {
     setState({ currentView: state.previousView || 'home', viewingProduct: null, previousView: null });
 }
+
+// ----- FILTER MODAL HANDLERS -----
+
+function handleOpenFilterModal() {
+    setState({ isFilterModalOpen: true });
+}
+
+function handleCloseFilterModal() {
+    setState({ isFilterModalOpen: false });
+}
+
+function handleApplyFilters(event: Event) {
+    event.preventDefault();
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+    
+    const location = formData.get('location') as 'Kampus Indralaya' | 'Kampus Bukit' | null;
+    const conditions = formData.getAll('condition') as ('Baru' | 'Seperti Baru' | 'Bekas')[];
+    const minPrice = formData.get('minPrice') ? Number(formData.get('minPrice')) : null;
+    const maxPrice = formData.get('maxPrice') ? Number(formData.get('maxPrice')) : null;
+
+    if (minPrice !== null && maxPrice !== null && minPrice > maxPrice) {
+        showNotification('Harga minimum tidak boleh lebih besar dari harga maksimum.');
+        return;
+    }
+
+    setState({
+        filter: {
+            ...state.filter,
+            location,
+            conditions,
+            minPrice,
+            maxPrice,
+        },
+        isFilterModalOpen: false,
+    });
+}
+
+function handleResetFilters() {
+    setState({
+        filter: {
+            query: state.filter.query, // Keep the search query
+            faculty: null,
+            location: null,
+            conditions: [],
+            minPrice: null,
+            maxPrice: null,
+        },
+        isFilterModalOpen: false,
+    });
+}
+
 
 // ----- ADMIN ACTION HANDLERS -----
 
@@ -497,19 +619,6 @@ function handleClearFacultyFilter() {
     setState({ filter: { ...state.filter, faculty: null } });
 }
 
-function handleLocationFilterClick(event: Event) {
-    const target = event.target as HTMLElement;
-    const button = target.closest<HTMLElement>('[data-location-filter]');
-    if (button) {
-        const location = button.dataset.locationFilter as 'Kampus Indralaya' | 'Kampus Bukit';
-        if (state.filter.location === location) {
-            setState({ filter: { ...state.filter, location: null } });
-        } else {
-            setState({ filter: { ...state.filter, location } });
-        }
-    }
-}
-
 function handleClearLocationFilter() {
      setState({ filter: { ...state.filter, location: null } });
 }
@@ -601,7 +710,7 @@ export function attachHomeEventListeners() {
     document.getElementById('home-logo')?.addEventListener('click', handleGoBackHome);
     document.getElementById('notification-bell-icon')?.addEventListener('click', handleToggleNotificationMenu);
     document.getElementById('user-profile-menu-toggle')?.addEventListener('click', handleToggleProfileMenu);
-    document.querySelector('header')?.addEventListener('click', handleLocationFilterClick);
+    document.getElementById('open-filter-modal-button')?.addEventListener('click', handleOpenFilterModal);
 
 
     // Page-specific listeners
@@ -656,6 +765,14 @@ export function attachHomeEventListeners() {
         });
         document.getElementById('cancel-logout-button')?.addEventListener('click', handleCancelLogout);
         document.getElementById('confirm-logout-button')?.addEventListener('click', handleConfirmLogout);
+    }
+    if (state.isFilterModalOpen) {
+        document.getElementById('filter-modal-backdrop')?.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('filter-modal-backdrop')) handleCloseFilterModal();
+        });
+        document.getElementById('close-filter-modal-button')?.addEventListener('click', handleCloseFilterModal);
+        document.getElementById('filter-form')?.addEventListener('submit', handleApplyFilters);
+        document.getElementById('reset-filters-button')?.addEventListener('click', handleResetFilters);
     }
     if (state.isDeleteConfirmationOpen) {
         document.getElementById('admin-delete-modal-backdrop')?.addEventListener('click', (e) => {

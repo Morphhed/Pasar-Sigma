@@ -48,6 +48,7 @@ export interface AppState {
     isLogoutModalOpen: boolean;
     isVerificationModalOpen: boolean;
     isProfileMenuOpen: boolean;
+    isFilterModalOpen: boolean;
     isEditModalOpen: boolean;
     editingProduct: Product | null;
     isDeleteConfirmationOpen: boolean;
@@ -57,6 +58,9 @@ export interface AppState {
         query: string;
         faculty: string | null;
         location: 'Kampus Indralaya' | 'Kampus Bukit' | null;
+        conditions: ('Baru' | 'Seperti Baru' | 'Bekas')[];
+        minPrice: number | null;
+        maxPrice: number | null;
     };
     users: User[];
     currentUser: User | null;
@@ -244,12 +248,13 @@ export let state: AppState = {
     isLogoutModalOpen: false,
     isVerificationModalOpen: false,
     isProfileMenuOpen: false,
+    isFilterModalOpen: false,
     isEditModalOpen: false,
     editingProduct: null,
     isDeleteConfirmationOpen: false,
     deletingProductId: null,
     listings: [],
-    filter: { query: '', faculty: null, location: null },
+    filter: { query: '', faculty: null, location: null, conditions: [], minPrice: null, maxPrice: null },
     users: [],
     currentUser: null,
     viewingProfileOf: null,
@@ -330,7 +335,9 @@ export function showNotification(message: string, type: 'success' | 'error' = 'e
 }
 
 export function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
-    let timeout: number;
+    // FIX: The return type of `setTimeout` can be NodeJS.Timeout in a Node environment.
+    // `ReturnType<typeof setTimeout>` correctly infers the type in both browser and Node environments.
+    let timeout: ReturnType<typeof setTimeout>;
 
     return (...args: Parameters<F>): void => {
         clearTimeout(timeout);

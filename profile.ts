@@ -33,7 +33,17 @@ export const ProfileView = (): string => {
     const user = state.viewingProfileOf;
     if (!user) return `<p>Pengguna tidak ditemukan.</p>`;
 
-    const userProducts = state.listings.filter(p => p.sellerId === user.nim);
+    const { query, location, conditions, minPrice, maxPrice } = state.filter;
+
+    const userProducts = state.listings
+        .filter(p => p.sellerId === user.nim)
+        // Apply global filters to the user's products
+        .filter(p => p.title.toLowerCase().includes(query.toLowerCase()))
+        .filter(p => location ? p.location === location : true)
+        .filter(p => conditions.length > 0 ? conditions.includes(p.condition) : true)
+        .filter(p => minPrice !== null ? p.price >= minPrice : true)
+        .filter(p => maxPrice !== null ? p.price <= maxPrice : true);
+
     const isOwnProfile = state.currentUser?.nim === user.nim;
     
     return `
@@ -67,7 +77,7 @@ export const ProfileView = (): string => {
             </div>
             <h3 class="text-2xl font-bold text-gray-800 mb-4">Produk dari ${user.name}</h3>
             <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                ${userProducts.length > 0 ? userProducts.map(ProductCard).join('') : `<p class="col-span-full text-center text-gray-500 mt-8">Pengguna ini belum memiliki produk.</p>`}
+                ${userProducts.length > 0 ? userProducts.map(ProductCard).join('') : `<p class="col-span-full text-center text-gray-500 mt-8">Pengguna ini belum memiliki produk yang sesuai dengan filter Anda.</p>`}
             </div>
         </main>
     </div>
