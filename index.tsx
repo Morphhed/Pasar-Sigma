@@ -6,7 +6,7 @@ import { state, subscribe, initializeApp, navigateTo } from './shared';
 import { LoginView, RegisterView, attachLoginEventListeners } from './login';
 import { HomeView, CreateListingModal, attachHomeEventListeners, FilterModal } from './home';
 import { ProfileView, attachProfileEventListeners, VerificationModal } from './profile';
-import { ProductDetailView, NotificationToast, LogoutConfirmationModal, AdminDeleteConfirmationModal, AdminEditModal } from './shared';
+import { ProductDetailView, NotificationToast, LogoutConfirmationModal, DeleteConfirmationModal, EditListingModal } from './shared';
 
 // =============== LOADING VIEW ===============
 const LoadingView = (): string => `
@@ -71,8 +71,8 @@ function render() {
     const logoutModalHtml = state.isLogoutModalOpen ? LogoutConfirmationModal() : '';
     const verificationModalHtml = state.isVerificationModalOpen ? VerificationModal() : '';
     const filterModalHtml = state.isFilterModalOpen ? FilterModal() : '';
-    const editModalHtml = state.isEditModalOpen ? AdminEditModal() : '';
-    const deleteModalHtml = state.isDeleteConfirmationOpen ? AdminDeleteConfirmationModal() : '';
+    const editModalHtml = state.isEditModalOpen ? EditListingModal() : '';
+    const deleteModalHtml = state.isDeleteConfirmationOpen ? DeleteConfirmationModal() : '';
     const errorFlashHtml = ErrorFlashView();
     const notificationsHtml = `
         <div id="notification-container" class="fixed top-4 right-4 z-50 space-y-2 w-full max-w-xs">

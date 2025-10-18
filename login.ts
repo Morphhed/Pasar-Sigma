@@ -45,11 +45,10 @@ export const LoginView = (): string => `
         
         <!-- Gradient Panel -->
         <div class="relative hidden md:block md:col-span-3 bg-gradient-to-br from-yellow-400 to-green-600">
-            <div class="relative h-full flex flex-col justify-end p-10">
-                <h1 class="text-4xl font-bold text-white leading-tight" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.6)">
+            <div class="relative h-full flex flex-col justify-center p-16">
+                <h1 class="font-slogan text-6xl lg:text-7xl font-black text-white leading-none uppercase tracking-tighter" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.6)">
                     Jual Beli Mudah <br> dari Mahasiswa, <br> untuk Mahasiswa.
                 </h1>
-                <p class="text-yellow-200 mt-4 text-lg" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5)">Pasar UNSRI</p>
             </div>
         </div>
 
@@ -57,7 +56,7 @@ export const LoginView = (): string => `
         <div class="md:col-span-2 flex flex-col justify-center items-center p-6 sm:p-12 bg-gray-50">
             <div class="w-full max-w-md">
                 <div class="text-center md:text-left mb-10">
-                    <h2 class="text-3xl font-bold text-gray-800">Pasar <span class="text-yellow-500">UNSRI</span></h2>
+                    <h2 class="text-4xl font-bold text-gray-800">Pasar <span class="text-yellow-500">UNSRI</span></h2>
                     <p class="text-gray-500 mt-2">Selamat datang kembali! Silakan masuk.</p>
                 </div>
 
@@ -92,11 +91,10 @@ export const RegisterView = (): string => `
         
         <!-- Gradient Panel -->
         <div class="relative hidden md:block md:col-span-3 bg-gradient-to-br from-yellow-400 to-green-600">
-            <div class="relative h-full flex flex-col justify-end p-10">
-                <h1 class="text-4xl font-bold text-white leading-tight" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.6)">
-                    Bergabunglah dengan Ribuan <br> Mahasiswa Unsri Lainnya.
+            <div class="relative h-full flex flex-col justify-center p-16">
+                <h1 class="font-slogan text-6xl lg:text-7xl font-black text-white leading-none uppercase tracking-tighter" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.6)">
+                    Bergabung dengan Ribuan <br> Mahasiswa Unsri Lainnya.
                 </h1>
-                 <p class="text-yellow-200 mt-4 text-lg" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5)">Pasar UNSRI</p>
             </div>
         </div>
 

@@ -9,7 +9,7 @@ import type { Product } from './shared';
 // Using local variables to manage image files for modal forms
 // to avoid cluttering the global state.
 let uploadedImages: { file: File, dataUrl: string }[] = [];
-let adminEditingImage: { file: File, dataUrl: string } | null = null;
+let editingImage: { file: File, dataUrl: string } | null = null;
 
 
 // =============== COMPONENT TEMPLATES ===============
@@ -114,7 +114,7 @@ const HomeHeader = (): string => {
     return `
         <header class="bg-white shadow-md sticky top-0 z-10">
             <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-yellow-500 cursor-pointer" id="home-logo">Pasar UNSRI</h1>
+                <h1 class="text-4xl font-bold text-yellow-500 cursor-pointer" id="home-logo">Pasar <span class="text-gray-800">UNSRI</span></h1>
                 <div class="flex items-center space-x-4">
                     <div class="relative">
                         <button id="notification-bell-icon" class="text-gray-600 text-xl hover:text-yellow-500 cursor-pointer w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors ${state.notificationMode === 'off' ? 'text-gray-400' : ''}" title="Pengaturan Notifikasi">
@@ -435,13 +435,13 @@ function handleResetFilters() {
 }
 
 
-// ----- ADMIN ACTION HANDLERS -----
+// ----- USER & ADMIN ACTION HANDLERS -----
 
-function handleOpenAdminDeleteModal(productId: number) {
+function handleOpenDeleteModal(productId: number) {
     setState({ isDeleteConfirmationOpen: true, deletingProductId: productId });
 }
 
-function handleConfirmAdminDelete() {
+function handleConfirmDelete() {
     if (state.deletingProductId === null) return;
     const updatedListings = state.listings.filter(p => p.id !== state.deletingProductId);
     setState({ 
@@ -450,9 +450,14 @@ function handleConfirmAdminDelete() {
         deletingProductId: null 
     });
     showNotification('Listing berhasil dihapus.', 'success');
+
+    // If deleting from detail view, navigate back
+    if (state.currentView === 'productDetail') {
+        navigateTo('home');
+    }
 }
 
-function handleCancelAdminDelete() {
+function handleCancelDelete() {
     setState({ isDeleteConfirmationOpen: false, deletingProductId: null });
 }
 
@@ -468,23 +473,23 @@ function handleToggleFlag(productId: number) {
     showNotification(`Listing ${product?.isFlagged ? 'ditandai' : 'tidak ditandai'}.`, 'success');
 }
 
-function handleOpenAdminEditModal(productId: number) {
+function handleOpenEditModal(productId: number) {
     const product = state.listings.find(p => p.id === productId);
     if (product) {
         setState({ isEditModalOpen: true, editingProduct: product });
     }
 }
 
-function handleCloseAdminEditModal() {
-    adminEditingImage = null;
+function handleCloseEditModal() {
+    editingImage = null;
     setState({ isEditModalOpen: false, editingProduct: null });
 }
 
-function handleAdminTriggerImageUpload() {
-    document.getElementById('admin-image-upload-input')?.click();
+function handleEditTriggerImageUpload() {
+    document.getElementById('edit-image-upload-input')?.click();
 }
 
-function handleAdminImageSelection(event: Event) {
+function handleEditImageSelection(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
         const file = input.files[0];
@@ -495,9 +500,9 @@ function handleAdminImageSelection(event: Event) {
         const reader = new FileReader();
         reader.onload = (e) => {
             const dataUrl = e.target?.result as string;
-            adminEditingImage = { file, dataUrl };
+            editingImage = { file, dataUrl };
             
-            const previewEl = document.getElementById('admin-edit-image-preview') as HTMLImageElement;
+            const previewEl = document.getElementById('edit-image-preview') as HTMLImageElement;
             if (previewEl) {
                 previewEl.src = dataUrl;
             }
@@ -506,7 +511,7 @@ function handleAdminImageSelection(event: Event) {
     }
 }
 
-function handleAdminUpdateListing(event: Event) {
+function handleUpdateListing(event: Event) {
     event.preventDefault();
     if (!state.editingProduct) return;
 
@@ -518,18 +523,19 @@ function handleAdminUpdateListing(event: Event) {
         title: formData.get('title') as string,
         price: Number(formData.get('price')),
         description: formData.get('description') as string,
-        imageUrl: adminEditingImage ? adminEditingImage.dataUrl : state.editingProduct.imageUrl,
+        imageUrl: editingImage ? editingImage.dataUrl : state.editingProduct.imageUrl,
         location: formData.get('location') as 'Kampus Indralaya' | 'Kampus Bukit',
     };
 
     const updatedListings = state.listings.map(p => p.id === updatedProduct.id ? updatedProduct : p);
     
-    adminEditingImage = null;
+    editingImage = null;
 
     setState({
         listings: updatedListings,
         isEditModalOpen: false,
         editingProduct: null,
+        viewingProduct: state.currentView === 'productDetail' ? updatedProduct : state.viewingProduct,
     });
     showNotification('Listing berhasil diperbarui.', 'success');
 }
@@ -539,12 +545,12 @@ function handleProductGridClick(event: Event) {
     const target = event.target as HTMLElement;
 
     // Admin buttons
-    const editBtn = target.closest<HTMLElement>('[data-admin-edit-id]');
-    if (editBtn) {
+    const adminEditBtn = target.closest<HTMLElement>('[data-admin-edit-id]');
+    if (adminEditBtn) {
         event.preventDefault();
         event.stopPropagation();
-        const productId = Number(editBtn.dataset.adminEditId);
-        handleOpenAdminEditModal(productId);
+        const productId = Number(adminEditBtn.dataset.adminEditId);
+        handleOpenEditModal(productId);
         return;
     }
     const flagBtn = target.closest<HTMLElement>('[data-admin-flag-id]');
@@ -555,12 +561,30 @@ function handleProductGridClick(event: Event) {
         handleToggleFlag(productId);
         return;
     }
-    const deleteBtn = target.closest<HTMLElement>('[data-admin-delete-id]');
-    if (deleteBtn) {
+    const adminDeleteBtn = target.closest<HTMLElement>('[data-admin-delete-id]');
+    if (adminDeleteBtn) {
         event.preventDefault();
         event.stopPropagation();
-        const productId = Number(deleteBtn.dataset.adminDeleteId);
-        handleOpenAdminDeleteModal(productId);
+        const productId = Number(adminDeleteBtn.dataset.adminDeleteId);
+        handleOpenDeleteModal(productId);
+        return;
+    }
+
+    // User (owner) buttons
+    const userEditBtn = target.closest<HTMLElement>('[data-user-edit-id]');
+    if (userEditBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        const productId = Number(userEditBtn.dataset.userEditId);
+        handleOpenEditModal(productId);
+        return;
+    }
+    const userDeleteBtn = target.closest<HTMLElement>('[data-user-delete-id]');
+    if (userDeleteBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        const productId = Number(userDeleteBtn.dataset.userDeleteId);
+        handleOpenDeleteModal(productId);
         return;
     }
 
@@ -755,20 +779,20 @@ export function attachHomeEventListeners() {
         document.getElementById('reset-filters-button')?.addEventListener('click', handleResetFilters);
     }
     if (state.isDeleteConfirmationOpen) {
-        document.getElementById('admin-delete-modal-backdrop')?.addEventListener('click', (e) => {
-             if (e.target === document.getElementById('admin-delete-modal-backdrop')) handleCancelAdminDelete();
+        document.getElementById('delete-modal-backdrop')?.addEventListener('click', (e) => {
+             if (e.target === document.getElementById('delete-modal-backdrop')) handleCancelDelete();
         });
-        document.getElementById('cancel-admin-delete-button')?.addEventListener('click', handleCancelAdminDelete);
-        document.getElementById('confirm-admin-delete-button')?.addEventListener('click', handleConfirmAdminDelete);
+        document.getElementById('cancel-delete-button')?.addEventListener('click', handleCancelDelete);
+        document.getElementById('confirm-delete-button')?.addEventListener('click', handleConfirmDelete);
     }
     if (state.isEditModalOpen) {
         document.getElementById('edit-modal-backdrop')?.addEventListener('click', (e) => {
-             if (e.target === document.getElementById('edit-modal-backdrop')) handleCloseAdminEditModal();
+             if (e.target === document.getElementById('edit-modal-backdrop')) handleCloseEditModal();
         });
-        document.getElementById('close-edit-modal-button')?.addEventListener('click', handleCloseAdminEditModal);
-        document.getElementById('cancel-edit-modal-button')?.addEventListener('click', handleCloseAdminEditModal);
-        document.getElementById('admin-edit-listing-form')?.addEventListener('submit', handleAdminUpdateListing);
-        document.getElementById('admin-change-image-button')?.addEventListener('click', handleAdminTriggerImageUpload);
-        document.getElementById('admin-image-upload-input')?.addEventListener('change', handleAdminImageSelection);
+        document.getElementById('close-edit-modal-button')?.addEventListener('click', handleCloseEditModal);
+        document.getElementById('cancel-edit-modal-button')?.addEventListener('click', handleCloseEditModal);
+        document.getElementById('edit-listing-form')?.addEventListener('submit', handleUpdateListing);
+        document.getElementById('change-image-button')?.addEventListener('click', handleEditTriggerImageUpload);
+        document.getElementById('edit-image-upload-input')?.addEventListener('change', handleEditImageSelection);
     }
 }

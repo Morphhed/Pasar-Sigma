@@ -407,7 +407,23 @@ export const NotificationToast = (notification: AppNotification): string => {
 
 export const ProductCard = (product: Product): string => {
     const isAdmin = state.currentUser?.isAdmin;
+    const isOwner = state.currentUser?.nim === product.sellerId;
     const isFlagged = product.isFlagged;
+
+    const adminPanel = `
+        <div class="flex-shrink-0 bg-gray-50 p-2 flex justify-around items-center border-t">
+            <button data-admin-edit-id="${product.id}" class="text-sm text-blue-600 hover:text-blue-800 transition" title="Edit Listing"><i class="fas fa-edit mr-1"></i>Edit</button>
+            <button data-admin-flag-id="${product.id}" class="text-sm ${isFlagged ? 'text-yellow-600 hover:text-yellow-800' : 'text-gray-600 hover:text-gray-900'} transition" title="${isFlagged ? 'Un-flag Listing' : 'Flag Listing'}"><i class="fas fa-flag mr-1"></i>${isFlagged ? 'Un-flag' : 'Flag'}</button>
+            <button data-admin-delete-id="${product.id}" class="text-sm text-red-600 hover:text-red-800 transition" title="Hapus Listing"><i class="fas fa-trash mr-1"></i>Hapus</button>
+        </div>
+    `;
+
+    const ownerPanel = `
+        <div class="flex-shrink-0 bg-gray-50 p-2 flex justify-around items-center border-t">
+            <button data-user-edit-id="${product.id}" class="text-sm text-blue-600 hover:text-blue-800 transition" title="Edit Iklan"><i class="fas fa-edit mr-1"></i>Edit</button>
+            <button data-user-delete-id="${product.id}" class="text-sm text-red-600 hover:text-red-800 transition" title="Hapus Iklan"><i class="fas fa-trash mr-1"></i>Hapus</button>
+        </div>
+    `;
 
     return `
     <div data-product-id="${product.id}" class="relative bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 flex flex-col cursor-pointer ${isFlagged ? 'ring-2 ring-red-500' : ''}">
@@ -432,13 +448,7 @@ export const ProductCard = (product: Product): string => {
                 <span class="font-medium">${product.location}</span>
             </div>
         </div>
-        ${isAdmin ? `
-            <div class="flex-shrink-0 bg-gray-50 p-2 flex justify-around items-center border-t">
-                <button data-admin-edit-id="${product.id}" class="text-sm text-blue-600 hover:text-blue-800 transition" title="Edit Listing"><i class="fas fa-edit mr-1"></i>Edit</button>
-                <button data-admin-flag-id="${product.id}" class="text-sm ${isFlagged ? 'text-yellow-600 hover:text-yellow-800' : 'text-gray-600 hover:text-gray-900'} transition" title="${isFlagged ? 'Un-flag Listing' : 'Flag Listing'}"><i class="fas fa-flag mr-1"></i>${isFlagged ? 'Un-flag' : 'Flag'}</button>
-                <button data-admin-delete-id="${product.id}" class="text-sm text-red-600 hover:text-red-800 transition" title="Hapus Listing"><i class="fas fa-trash mr-1"></i>Hapus</button>
-            </div>
-        ` : ''}
+        ${isAdmin ? adminPanel : (isOwner ? ownerPanel : '')}
     </div>
     `;
 };
@@ -451,7 +461,29 @@ export const ProductDetailView = (): string => {
     const seller = findUserByName(product.seller.name);
     const whatsappLink = seller ? `https://wa.me/${seller.phone}?text=Halo, saya tertarik dengan produk '${product.title}' di Pasar UNSRI.` : '#';
     const isAdmin = state.currentUser?.isAdmin;
+    const isOwner = state.currentUser?.nim === product.sellerId;
     const isFlagged = product.isFlagged;
+    
+    const adminActions = `
+        <div class="border-t mt-auto pt-4">
+            <h4 class="font-bold text-gray-700 mb-2">Panel Admin</h4>
+             <div class="flex justify-start space-x-3">
+                <button data-admin-edit-id="${product.id}" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition text-sm"><i class="fas fa-edit mr-2"></i>Edit</button>
+                <button data-admin-flag-id="${product.id}" class="bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition text-sm"><i class="fas fa-flag mr-2"></i>${isFlagged ? 'Un-flag' : 'Flag'}</button>
+                <button data-admin-delete-id="${product.id}" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition text-sm"><i class="fas fa-trash mr-2"></i>Hapus</button>
+            </div>
+        </div>
+    `;
+
+    const ownerActions = `
+        <div class="border-t mt-auto pt-4">
+            <h4 class="font-bold text-gray-700 mb-2">Panel Iklan Anda</h4>
+             <div class="flex justify-start space-x-3">
+                <button data-user-edit-id="${product.id}" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition text-sm"><i class="fas fa-edit mr-2"></i>Edit Iklan</button>
+                <button data-user-delete-id="${product.id}" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition text-sm"><i class="fas fa-trash mr-2"></i>Hapus Iklan</button>
+            </div>
+        </div>
+    `;
 
     return `
     <div class="min-h-screen bg-gray-100">
@@ -506,16 +538,7 @@ export const ProductDetailView = (): string => {
                         <h3 class="font-semibold text-gray-800 mb-2">Deskripsi</h3>
                         <p class="text-gray-600 text-sm whitespace-pre-wrap flex-grow">${product.description}</p>
 
-                        ${isAdmin ? `
-                        <div class="border-t mt-auto pt-4">
-                            <h4 class="font-bold text-gray-700 mb-2">Panel Admin</h4>
-                             <div class="flex justify-start space-x-3">
-                                <button data-admin-edit-id="${product.id}" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition text-sm"><i class="fas fa-edit mr-2"></i>Edit</button>
-                                <button data-admin-flag-id="${product.id}" class="bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition text-sm"><i class="fas fa-flag mr-2"></i>${isFlagged ? 'Un-flag' : 'Flag'}</button>
-                                <button data-admin-delete-id="${product.id}" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition text-sm"><i class="fas fa-trash mr-2"></i>Hapus</button>
-                            </div>
-                        </div>
-                        ` : ''}
+                        ${isAdmin ? adminActions : (isOwner ? ownerActions : '')}
                     </div>
                 </div>
             </div>
@@ -541,31 +564,31 @@ export const LogoutConfirmationModal = (): string => `
     </div>
 `;
 
-export const AdminDeleteConfirmationModal = (): string => `
-    <div id="admin-delete-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-60 z-40 modal-enter">
+export const DeleteConfirmationModal = (): string => `
+    <div id="delete-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-60 z-40 modal-enter">
         <div class="flex items-center justify-center min-h-screen p-4">
-            <div id="admin-delete-modal-content" class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center modal-content-enter">
+            <div id="delete-modal-content" class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center modal-content-enter">
                 <i class="fas fa-exclamation-triangle text-5xl text-red-500 mb-4"></i>
                 <h2 class="text-xl font-bold text-gray-800 mb-2">Konfirmasi Hapus</h2>
                 <p class="text-gray-600 mb-6">Anda akan menghapus listing ini secara permanen. Tindakan ini tidak dapat diurungkan.</p>
                 <div class="flex justify-center space-x-4">
-                    <button id="cancel-admin-delete-button" class="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300 transition">Batal</button>
-                    <button id="confirm-admin-delete-button" class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition">Ya, Hapus</button>
+                    <button id="cancel-delete-button" class="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300 transition">Batal</button>
+                    <button id="confirm-delete-button" class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition">Ya, Hapus</button>
                 </div>
             </div>
         </div>
     </div>
 `;
 
-export const AdminEditModal = (): string => {
+export const EditListingModal = (): string => {
     const product = state.editingProduct;
     if (!product) return '';
     return `
     <div id="edit-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-60 z-40 modal-enter">
         <div class="flex items-center justify-center min-h-screen p-4">
-            <form id="admin-edit-listing-form" class="bg-white rounded-lg shadow-xl w-full max-w-lg relative modal-content-enter flex flex-col max-h-[90vh]">
+            <form id="edit-listing-form" class="bg-white rounded-lg shadow-xl w-full max-w-lg relative modal-content-enter flex flex-col max-h-[90vh]">
                 <div class="flex-shrink-0 p-6 border-b flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-gray-800">Edit Listing (Admin)</h2>
+                    <h2 class="text-2xl font-bold text-gray-800">${state.currentUser?.isAdmin ? 'Edit Listing (Admin)' : 'Edit Iklan Anda'}</h2>
                     <button type="button" id="close-edit-modal-button" class="text-gray-500 hover:text-gray-800">
                         <i class="fas fa-times text-2xl"></i>
                     </button>
@@ -593,11 +616,11 @@ export const AdminEditModal = (): string => {
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Gambar Produk</label>
                         <div class="mt-1 relative group">
-                            <img id="admin-edit-image-preview" src="${product.imageUrl}" alt="Product image preview" class="w-full h-48 object-cover rounded-md bg-gray-100">
-                            <button type="button" id="admin-change-image-button" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-bold opacity-0 group-hover:opacity-100 transition-opacity rounded-md cursor-pointer">
+                            <img id="edit-image-preview" src="${product.imageUrl}" alt="Product image preview" class="w-full h-48 object-cover rounded-md bg-gray-100">
+                            <button type="button" id="change-image-button" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-bold opacity-0 group-hover:opacity-100 transition-opacity rounded-md cursor-pointer">
                                 <i class="fas fa-camera mr-2"></i> Ganti Gambar
                             </button>
-                            <input type="file" id="admin-image-upload-input" accept="image/*" class="hidden">
+                            <input type="file" id="edit-image-upload-input" accept="image/*" class="hidden">
                         </div>
                     </div>
                 </div>
