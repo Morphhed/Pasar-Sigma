@@ -47,7 +47,7 @@ export interface AppState {
     isModalOpen: boolean;
     isLogoutModalOpen: boolean;
     isVerificationModalOpen: boolean;
-    isProfileMenuOpen: boolean;
+    isEditingProfile: boolean;
     isFilterModalOpen: boolean;
     isEditModalOpen: boolean;
     editingProduct: Product | null;
@@ -248,7 +248,7 @@ export let state: AppState = {
     isModalOpen: false,
     isLogoutModalOpen: false,
     isVerificationModalOpen: false,
-    isProfileMenuOpen: false,
+    isEditingProfile: false,
     isFilterModalOpen: false,
     isEditModalOpen: false,
     editingProduct: null,

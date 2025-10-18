@@ -95,21 +95,6 @@ const NotificationMenu = (): string => {
     `;
 };
 
-const ProfileMenu = (): string => `
-    <div id="profile-menu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-20">
-        <div class="py-1" role="menu" aria-orientation="vertical">
-            <a href="#" id="view-profile-btn" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
-                <i class="fas ${state.currentUser?.isAdmin ? 'fa-user-shield' : 'fa-user-circle'} w-5 mr-3 text-gray-500"></i>
-                <span>${state.currentUser?.isAdmin ? 'Panel Admin' : 'Cek Profil'}</span>
-            </a>
-            <a href="#" id="logout-btn" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
-                 <i class="fas fa-sign-out-alt w-5 mr-3 text-gray-500"></i>
-                <span>Logout</span>
-            </a>
-        </div>
-    </div>
-`;
-
 const HomeHeader = (): string => {
     const getNotificationIcon = () => {
         switch(state.notificationMode) {
@@ -132,16 +117,23 @@ const HomeHeader = (): string => {
                 <h1 class="text-2xl font-bold text-yellow-500 cursor-pointer" id="home-logo">Pasar UNSRI</h1>
                 <div class="flex items-center space-x-4">
                     <div class="relative">
-                        <i id="notification-bell-icon" class="fas ${getNotificationIcon()} text-gray-600 text-xl hover:text-yellow-500 cursor-pointer ${state.notificationMode === 'off' ? 'text-gray-400' : ''}" title="Pengaturan Notifikasi"></i>
+                        <button id="notification-bell-icon" class="text-gray-600 text-xl hover:text-yellow-500 cursor-pointer w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors ${state.notificationMode === 'off' ? 'text-gray-400' : ''}" title="Pengaturan Notifikasi">
+                            <i class="fas ${getNotificationIcon()}"></i>
+                        </button>
                         ${state.isNotificationMenuOpen ? NotificationMenu() : ''}
                     </div>
-                    <div class="relative">
-                        <div id="user-profile-menu-toggle" class="flex items-center space-x-2 cursor-pointer group">
-                            <span class="font-semibold text-gray-700 group-hover:text-yellow-500">${state.currentUser?.name}</span>
-                            ${state.currentUser?.isAdmin ? '<i class="fas fa-user-shield text-green-500 text-xs" title="Super Admin"></i>' : ''}
-                            <i class="fas fa-chevron-down text-xs text-gray-600 group-hover:text-yellow-500 transition-transform ${state.isProfileMenuOpen ? 'rotate-180' : ''}"></i>
-                        </div>
-                        ${state.isProfileMenuOpen ? ProfileMenu() : ''}
+                    
+                    <div class="flex items-center space-x-2">
+                        <span class="font-semibold text-gray-700 hidden sm:block">${state.currentUser?.name}</span>
+                        ${state.currentUser?.isAdmin ? '<i class="fas fa-user-shield text-green-500" title="Super Admin"></i>' : ''}
+                        
+                        <button id="view-profile-btn" class="text-gray-600 text-xl hover:text-yellow-500 cursor-pointer w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors" title="${state.currentUser?.isAdmin ? 'Panel Admin' : 'Cek Profil'}">
+                            <i class="fas fa-user-circle"></i>
+                        </button>
+
+                        <button id="logout-btn" class="text-gray-600 text-xl hover:text-red-500 cursor-pointer w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 transition-colors" title="Logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -292,7 +284,7 @@ export const CreateListingModal = (): string => `
 
 // =============== EVENT HANDLERS ===============
 function handleOpenLogoutModal() {
-    setState({ isLogoutModalOpen: true, isProfileMenuOpen: false });
+    setState({ isLogoutModalOpen: true });
 }
 
 function handleConfirmLogout() {
@@ -367,7 +359,7 @@ function handleCreateListing(event: Event) {
 }
 
 function handleToggleNotificationMenu() {
-    setState({ isNotificationMenuOpen: !state.isNotificationMenuOpen, isProfileMenuOpen: false });
+    setState({ isNotificationMenuOpen: !state.isNotificationMenuOpen });
 }
 
 function handleChangeNotificationMode(event: Event) {
@@ -379,12 +371,7 @@ function handleChangeNotificationMode(event: Event) {
     }
 }
 
-function handleToggleProfileMenu() {
-    setState({ isProfileMenuOpen: !state.isProfileMenuOpen, isNotificationMenuOpen: false });
-}
-
 function handleViewOwnProfile() {
-    setState({ isProfileMenuOpen: false });
     navigateTo('profile', { viewingProfileOf: state.currentUser });
 }
 
@@ -706,9 +693,9 @@ export function attachHomeEventListeners() {
     // Header listeners
     document.getElementById('home-logo')?.addEventListener('click', handleGoBackHome);
     document.getElementById('notification-bell-icon')?.addEventListener('click', handleToggleNotificationMenu);
-    document.getElementById('user-profile-menu-toggle')?.addEventListener('click', handleToggleProfileMenu);
     document.getElementById('open-filter-modal-button')?.addEventListener('click', handleOpenFilterModal);
-
+    document.getElementById('view-profile-btn')?.addEventListener('click', handleViewOwnProfile);
+    document.getElementById('logout-btn')?.addEventListener('click', handleOpenLogoutModal);
 
     // Page-specific listeners
     document.getElementById('search-input')?.addEventListener('input', handleSearch);
@@ -727,10 +714,6 @@ export function attachHomeEventListeners() {
         document.querySelectorAll('#notification-menu a').forEach(item => {
             item.addEventListener('click', handleChangeNotificationMode);
         });
-    }
-    if (state.isProfileMenuOpen) {
-        document.getElementById('view-profile-btn')?.addEventListener('click', handleViewOwnProfile);
-        document.getElementById('logout-btn')?.addEventListener('click', handleOpenLogoutModal);
     }
 
     // Modal listeners
