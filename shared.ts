@@ -287,6 +287,36 @@ export function setState(newState: Partial<AppState>) {
     renderCallback();
 }
 
+
+/**
+ * Handles smooth view transitions.
+ * @param view The target view to navigate to.
+ * @param newState Optional additional state to set along with the view change.
+ */
+export function navigateTo(view: AppState['currentView'], newState: Partial<AppState> = {}) {
+    const root = document.getElementById('root');
+    if (!root) {
+        setState({ ...newState, currentView: view });
+        return;
+    }
+
+    // Don't apply fade-out for the initial load from the loading screen
+    if (state.isLoading || state.currentView === view) {
+        setState({ ...newState, currentView: view });
+        return;
+    }
+
+    root.style.opacity = '0'; // 1. Fade out the whole root
+
+    setTimeout(() => {
+        // 2. Update state. This calls render(), replacing content while invisible.
+        setState({ ...newState, currentView: view });
+        // 3. Fade the root back in. The render function handles the transition property.
+        root.style.opacity = '1';
+    }, 300); // This duration should match the CSS transition duration
+}
+
+
 // =============== UTILITY FUNCTIONS ===============
 export function findUserByName(name: string): User | undefined {
     return state.users.find(u => u.name === name);
@@ -316,11 +346,12 @@ export function showNotification(message: string, type: 'success' | 'error' = 'e
         const audio = document.getElementById('notification-sound') as HTMLAudioElement;
         if (audio) {
             const isLoginOrRegisterError = type === 'error' && (state.currentView === 'login' || state.currentView === 'register');
-            // The request is to make it "10x louder". Setting loud volume to max (1.0)
-            // and normal volume to 0.1 to create a significant difference.
-            audio.volume = isLoginOrRegisterError ? 1.0 : 0.1;
-            audio.currentTime = 0;
-            audio.play().catch(e => console.error("Error playing sound:", e));
+            // Only play sound if it is NOT a login or register error.
+            if (!isLoginOrRegisterError) {
+                audio.volume = 0.1; // Normal volume for other notifications
+                audio.currentTime = 0;
+                audio.play().catch(e => console.error("Error playing sound:", e));
+            }
         }
     }
 

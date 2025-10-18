@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { state, setState, showNotification, findUserByName, faculties, triggerErrorFlash } from './shared';
+import { state, setState, showNotification, findUserByName, faculties, navigateTo } from './shared';
 import type { User } from './shared';
 
 // =============== COMPONENT TEMPLATES ===============
@@ -43,14 +43,8 @@ const FloatingLabelInput = (
 export const LoginView = (): string => `
     <div class="min-h-screen bg-white md:grid md:grid-cols-5">
         
-        <!-- Image Panel -->
-        <div class="relative hidden md:block md:col-span-3">
-            <img 
-                src="https://images.unsplash.com/photo-1589983955218-3568735af22b?q=80&w=1887&auto=format&fit=crop" 
-                alt="Ampera Bridge, Palembang" 
-                class="absolute inset-0 w-full h-full object-cover"
-            >
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+        <!-- Gradient Panel -->
+        <div class="relative hidden md:block md:col-span-3 bg-gradient-to-br from-yellow-400 to-green-600">
             <div class="relative h-full flex flex-col justify-end p-10">
                 <h1 class="text-4xl font-bold text-white leading-tight" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.6)">
                     Jual Beli Mudah <br> dari Mahasiswa, <br> untuk Mahasiswa.
@@ -96,14 +90,8 @@ export const LoginView = (): string => `
 export const RegisterView = (): string => `
     <div class="min-h-screen bg-white md:grid md:grid-cols-5">
         
-        <!-- Image Panel -->
-        <div class="relative hidden md:block md:col-span-3">
-             <img 
-                src="https://images.unsplash.com/photo-1624555138323-2831b033583a?q=80&w=1887&auto=format&fit=crop" 
-                alt="Universitas Sriwijaya Campus" 
-                class="absolute inset-0 w-full h-full object-cover"
-            >
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+        <!-- Gradient Panel -->
+        <div class="relative hidden md:block md:col-span-3 bg-gradient-to-br from-yellow-400 to-green-600">
             <div class="relative h-full flex flex-col justify-end p-10">
                 <h1 class="text-4xl font-bold text-white leading-tight" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.6)">
                     Bergabunglah dengan Ribuan <br> Mahasiswa Unsri Lainnya.
@@ -179,7 +167,7 @@ function handleLogin(event: Event) {
         };
         console.log('Admin login successful');
         showNotification(`Selamat datang, ${adminUser.name}!`, 'success');
-        setState({ currentUser: adminUser, currentView: 'home' });
+        navigateTo('home', { currentUser: adminUser });
         return;
     }
 
@@ -187,10 +175,9 @@ function handleLogin(event: Event) {
 
     if (user && user.password === password) {
         console.log('Login successful for:', user.name);
-        setState({ currentUser: user, currentView: 'home' });
+        navigateTo('home', { currentUser: user });
     } else {
         showNotification('NIM atau password salah. Coba lagi.');
-        triggerErrorFlash();
     }
 }
 
@@ -209,17 +196,17 @@ function handleSigmaLogin(event: Event) {
         state.users.push(sigmaUser);
     }
     console.log('Sigma login activated.');
-    setState({ currentUser: sigmaUser, currentView: 'home' });
+    navigateTo('home', { currentUser: sigmaUser });
 }
 
 function handleGoToRegister(event: Event) {
     event.preventDefault();
-    setState({ currentView: 'register' });
+    navigateTo('register');
 }
 
 function handleGoToLogin(event: Event) {
     event.preventDefault();
-    setState({ currentView: 'login' });
+    navigateTo('login');
 }
 
 function handleRegister(event: Event) {
@@ -235,25 +222,21 @@ function handleRegister(event: Event) {
 
     if (!name || !email || !nim || !password || !faculty || !phone) {
         showNotification('Semua kolom wajib diisi.');
-        triggerErrorFlash();
         return;
     }
     
     if (state.users.some(u => u.nim === nim)) {
         showNotification('NIM ini sudah terdaftar. Silakan login.');
-        triggerErrorFlash();
         return;
     }
 
     if (!email.toLowerCase().endsWith('@unsri.ac.id')) {
         showNotification('Pendaftaran wajib menggunakan email @unsri.ac.id.');
-        triggerErrorFlash();
         return;
     }
 
     if (password.length < 10) {
         showNotification('Password harus memiliki minimal 10 karakter.');
-        triggerErrorFlash();
         return;
     }
 
@@ -262,7 +245,8 @@ function handleRegister(event: Event) {
     
     console.log('Registrasi berhasil untuk:', newUser);
     showNotification('Akun berhasil dibuat! Silakan masuk.', 'success');
-    setState({ users: updatedUsers, currentView: 'login' });
+    setState({ users: updatedUsers }); // Save users first
+    navigateTo('login'); // Then navigate
 }
 
 // =============== EVENT ATTACHMENT ===============

@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { state, setState, ProductCard, showNotification } from './shared';
+import { state, setState, ProductCard, showNotification, navigateTo } from './shared';
 // HomeHeader is rendered via HomeView's call in index.tsx
 // which adds the header. attachHomeEventListeners handles header events.
 
@@ -86,7 +86,7 @@ export const ProfileView = (): string => {
 
 // =============== EVENT HANDLERS ===============
 function handleGoBackHome() {
-    setState({ currentView: 'home', viewingProfileOf: null, filter: { ...state.filter, faculty: null } });
+    navigateTo('home', { viewingProfileOf: null, filter: { ...state.filter, faculty: null } });
 }
 
 function handleOpenVerificationModal() {

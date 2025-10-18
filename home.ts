@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { state, setState, showNotification, formatRupiah, debounce, ProductCard, findUserByName } from './shared';
+import { state, setState, showNotification, formatRupiah, debounce, ProductCard, findUserByName, navigateTo } from './shared';
 import type { Product } from './shared';
 
 // =============== LOCAL STATE FOR MODALS ===============
@@ -296,11 +296,8 @@ function handleOpenLogoutModal() {
 }
 
 function handleConfirmLogout() {
-    setState({ 
-        currentUser: null, 
-        currentView: 'login', 
-        isLogoutModalOpen: false 
-    });
+    setState({ isLogoutModalOpen: false });
+    navigateTo('login', { currentUser: null });
 }
 
 function handleCancelLogout() {
@@ -310,7 +307,7 @@ function handleCancelLogout() {
 function handleOpenModal() {
     if (state.currentUser && !state.currentUser.isVerified) {
         showNotification('Akun Anda belum terverifikasi. Silakan verifikasi di halaman profil untuk mulai menjual.', 'error');
-        setState({ currentView: 'profile', viewingProfileOf: state.currentUser });
+        navigateTo('profile', { viewingProfileOf: state.currentUser });
     } else {
         setState({ isModalOpen: true });
     }
@@ -387,15 +384,16 @@ function handleToggleProfileMenu() {
 }
 
 function handleViewOwnProfile() {
-    setState({ currentView: 'profile', viewingProfileOf: state.currentUser, isProfileMenuOpen: false });
+    setState({ isProfileMenuOpen: false });
+    navigateTo('profile', { viewingProfileOf: state.currentUser });
 }
 
 function handleGoBackHome() {
-    setState({ currentView: 'home', viewingProfileOf: null, filter: { query: '', faculty: null, location: null, conditions: [], minPrice: null, maxPrice: null } });
+    navigateTo('home', { viewingProfileOf: null, filter: { query: '', faculty: null, location: null, conditions: [], minPrice: null, maxPrice: null } });
 }
 
 function handleGoBackFromDetail() {
-    setState({ currentView: state.previousView || 'home', viewingProduct: null, previousView: null });
+    navigateTo(state.previousView || 'home', { viewingProduct: null, previousView: null });
 }
 
 // ----- FILTER MODAL HANDLERS -----
@@ -588,7 +586,7 @@ function handleProductGridClick(event: Event) {
         event.preventDefault();
         const user = findUserByName(sellerName);
         if (user) {
-            setState({ currentView: 'profile', viewingProfileOf: user });
+            navigateTo('profile', { viewingProfileOf: user });
         } else {
             showNotification(`Profil untuk ${sellerName} tidak ditemukan.`);
         }
@@ -606,8 +604,7 @@ function handleProductGridClick(event: Event) {
         const productId = Number(productCard.dataset.productId);
         const product = state.listings.find(p => p.id === productId);
         if (product) {
-            setState({ 
-                currentView: 'productDetail', 
+            navigateTo('productDetail', { 
                 viewingProduct: product,
                 previousView: state.currentView as 'home' | 'profile'
             });

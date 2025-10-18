@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { state, subscribe, initializeApp } from './shared';
+import { state, subscribe, initializeApp, navigateTo } from './shared';
 import { LoginView, RegisterView, attachLoginEventListeners } from './login';
 import { HomeView, CreateListingModal, attachHomeEventListeners, FilterModal } from './home';
 import { ProfileView, attachProfileEventListeners, VerificationModal } from './profile';
@@ -37,9 +37,14 @@ function render() {
         console.error('Root element not found!');
         return;
     }
+    
+    // Apply transition class for smooth view changes
+    root.style.transition = 'opacity 0.3s ease-in-out';
 
     if (state.isLoading) {
         root.innerHTML = LoadingView();
+        // Ensure opacity is 1 for loading screen
+        root.style.opacity = '1';
         return;
     }
 
