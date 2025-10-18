@@ -7,27 +7,86 @@ import type { User } from './shared';
 
 // =============== COMPONENT TEMPLATES ===============
 
+// Helper function untuk membuat input dengan "floating label"
+const FloatingLabelInput = (
+    id: string, 
+    name: string, 
+    type: string, 
+    label: string, 
+    icon: string,
+    required: boolean = true,
+    minLength?: number
+): string => `
+    <div class="relative">
+        <input 
+            type="${type}" 
+            id="${id}" 
+            name="${name}" 
+            class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 peer" 
+            placeholder=" " 
+            ${required ? 'required' : ''}
+            ${minLength ? `minlength="${minLength}"` : ''}
+        />
+        <label 
+            for="${id}" 
+            class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-gray-50 px-2 peer-focus:px-2 peer-focus:text-yellow-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1"
+        >
+            ${label}
+        </label>
+        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+            <i class="fas ${icon} text-gray-400"></i>
+        </div>
+    </div>
+`;
+
+
 export const LoginView = (): string => `
-    <div class="min-h-screen bg-gradient-to-br from-green-600 to-yellow-400 flex flex-col justify-center items-center p-4">
-        <div class="w-full max-w-sm text-center">
-            <h1 class="text-4xl font-bold text-white mb-4" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.4)">Pasar UNSRI</h1>
-            <p class="text-yellow-200 mb-8" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.4)">Marketplace Eksklusif Mahasiswa Unsri</p>
-            <div class="bg-white/80 backdrop-blur-sm rounded-lg p-8 shadow-xl">
-                <form id="login-form">
-                    <div class="mb-4">
-                        <input type="text" name="nim" placeholder="Nomor Induk Mahasiswa (NIM)" class="w-full p-3 bg-white border border-gray-300 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                    </div>
-                    <div class="mb-6">
-                        <input type="password" name="password" placeholder="Password" class="w-full p-3 bg-white border border-gray-300 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                    </div>
-                    <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-md hover:bg-green-700 transition duration-300">MASUK</button>
+    <div class="min-h-screen bg-white md:grid md:grid-cols-5">
+        
+        <!-- Image Panel -->
+        <div class="relative hidden md:block md:col-span-3">
+            <img 
+                src="https://images.unsplash.com/photo-1589983955218-3568735af22b?q=80&w=1887&auto=format&fit=crop" 
+                alt="Ampera Bridge, Palembang" 
+                class="absolute inset-0 w-full h-full object-cover"
+            >
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+            <div class="relative h-full flex flex-col justify-end p-10">
+                <h1 class="text-4xl font-bold text-white leading-tight" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.6)">
+                    Jual Beli Mudah <br> dari Mahasiswa, <br> untuk Mahasiswa.
+                </h1>
+                <p class="text-yellow-200 mt-4 text-lg" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5)">Pasar UNSRI</p>
+            </div>
+        </div>
+
+        <!-- Form Panel -->
+        <div class="md:col-span-2 flex flex-col justify-center items-center p-6 sm:p-12 bg-gray-50">
+            <div class="w-full max-w-md">
+                <div class="text-center md:text-left mb-10">
+                    <h2 class="text-3xl font-bold text-gray-800">Pasar <span class="text-yellow-500">UNSRI</span></h2>
+                    <p class="text-gray-500 mt-2">Selamat datang kembali! Silakan masuk.</p>
+                </div>
+
+                <form id="login-form" class="space-y-6">
+                    ${FloatingLabelInput('nim', 'nim', 'text', 'Nomor Induk Mahasiswa (NIM)', 'fa-user')}
+                    ${FloatingLabelInput('password', 'password', 'password', 'Password', 'fa-lock')}
+                    
+                    <button 
+                        type="submit" 
+                        class="w-full bg-gradient-to-r from-yellow-500 to-green-600 text-white font-bold py-3 rounded-lg hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                    >
+                        MASUK
+                    </button>
                 </form>
-                 <p class="text-sm text-gray-600 mt-6">
+
+                <p class="text-sm text-gray-600 text-center mt-8">
                     Belum punya akun? 
-                    <a href="#" id="go-to-register" class="font-semibold text-green-600 hover:underline">Buat Akun</a>
+                    <a href="#" id="go-to-register" class="font-semibold text-green-600 hover:underline">
+                        Buat Akun
+                    </a>
                 </p>
-                <p class="text-xs text-gray-500 mt-4">
-                    <a href="#" id="sigma-login" class="hover:underline">sigma mode</a>
+                <p class="text-xs text-gray-400 text-center mt-4">
+                    <a href="#" id="sigma-login" class="hover:underline">masuk sebagai sigma</a>
                 </p>
             </div>
         </div>
@@ -35,38 +94,62 @@ export const LoginView = (): string => `
 `;
 
 export const RegisterView = (): string => `
-    <div class="min-h-screen bg-gradient-to-br from-green-200 to-yellow-200 flex flex-col justify-center items-center p-4">
-        <div class="w-full max-w-sm text-center">
-            <h1 class="text-4xl font-bold text-green-800 mb-2">Buat Akun Baru</h1>
-            <p class="text-green-700 mb-8">Gabung dengan komunitas Pasar UNSRI</p>
-            <div class="bg-white/80 backdrop-blur-sm rounded-lg p-8 shadow-xl">
-                <form id="register-form" novalidate>
-                    <div class="mb-4">
-                         <input type="text" name="name" placeholder="Nama Lengkap" class="w-full p-3 bg-white border border-gray-300 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                    </div>
-                    <div class="mb-4">
-                        <input type="text" name="nim" placeholder="Nomor Induk Mahasiswa (NIM)" class="w-full p-3 bg-white border border-gray-300 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                    </div>
-                    <div class="mb-4">
-                         <select name="faculty" class="w-full p-3 bg-white border border-gray-300 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                            <option value="" disabled selected>Pilih Fakultas</option>
+    <div class="min-h-screen bg-white md:grid md:grid-cols-5">
+        
+        <!-- Image Panel -->
+        <div class="relative hidden md:block md:col-span-3">
+             <img 
+                src="https://images.unsplash.com/photo-1624555138323-2831b033583a?q=80&w=1887&auto=format&fit=crop" 
+                alt="Universitas Sriwijaya Campus" 
+                class="absolute inset-0 w-full h-full object-cover"
+            >
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+            <div class="relative h-full flex flex-col justify-end p-10">
+                <h1 class="text-4xl font-bold text-white leading-tight" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.6)">
+                    Bergabunglah dengan Ribuan <br> Mahasiswa Unsri Lainnya.
+                </h1>
+                 <p class="text-yellow-200 mt-4 text-lg" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5)">Pasar UNSRI</p>
+            </div>
+        </div>
+
+        <!-- Form Panel -->
+        <div class="md:col-span-2 flex flex-col justify-center items-center p-6 sm:p-12 bg-gray-50">
+            <div class="w-full max-w-md">
+                <div class="text-center md:text-left mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800">Buat Akun Baru</h2>
+                    <p class="text-gray-500 mt-2">Isi data di bawah untuk mendaftar.</p>
+                </div>
+                 <form id="register-form" novalidate class="space-y-4">
+                    ${FloatingLabelInput('name', 'name', 'text', 'Nama Lengkap', 'fa-user')}
+                    ${FloatingLabelInput('nim', 'nim', 'text', 'Nomor Induk Mahasiswa (NIM)', 'fa-id-card')}
+                    <div class="relative">
+                        <select name="faculty" id="faculty" class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 peer" required>
+                            <option value="" disabled selected></option>
                             ${faculties.map(f => `<option value="${f}">${f}</option>`).join('')}
                         </select>
+                        <label for="faculty" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-gray-50 px-2 peer-focus:px-2 peer-focus:text-yellow-600 
+                        peer-[:invalid]:scale-100 peer-[:invalid]:-translate-y-1/2 peer-[:invalid]:top-1/2
+                        peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1">Pilih Fakultas</label>
+                        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                             <i class="fas fa-building-columns text-gray-400"></i>
+                        </div>
                     </div>
-                     <div class="mb-4">
-                        <input type="tel" name="phone" placeholder="Nomor WhatsApp (e.g., 62812...)" class="w-full p-3 bg-white border border-gray-300 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                    </div>
-                    <div class="mb-4">
-                        <input type="email" name="email" placeholder="Email Kampus (@unsri.ac.id)" class="w-full p-3 bg-white border border-gray-300 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                    </div>
-                    <div class="mb-4">
-                        <input type="password" name="password" placeholder="Password (min. 10 karakter)" class="w-full p-3 bg-white border border-gray-300 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required minlength="10">
-                    </div>
-                    <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-md hover:bg-green-700 transition duration-300">DAFTAR</button>
+                    ${FloatingLabelInput('phone', 'phone', 'tel', 'Nomor WhatsApp (e.g., 62812...)', 'fab fa-whatsapp')}
+                    ${FloatingLabelInput('email', 'email', 'email', 'Email Kampus (@unsri.ac.id)', 'fa-envelope')}
+                    ${FloatingLabelInput('password', 'password', 'password', 'Password (min. 10 karakter)', 'fa-lock', true, 10)}
+                    
+                    <button 
+                        type="submit" 
+                        class="w-full bg-gradient-to-r from-yellow-500 to-green-600 text-white font-bold py-3 rounded-lg hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 !mt-8"
+                    >
+                        DAFTAR
+                    </button>
                 </form>
-                <p class="text-sm text-gray-600 mt-6">
+                <p class="text-sm text-gray-600 text-center mt-6">
                     Sudah punya akun? 
-                    <a href="#" id="go-to-login" class="font-semibold text-green-600 hover:underline">Masuk di sini</a>
+                    <a href="#" id="go-to-login" class="font-semibold text-green-600 hover:underline">
+                        Masuk di sini
+                    </a>
                 </p>
             </div>
         </div>
