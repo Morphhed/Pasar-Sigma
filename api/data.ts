@@ -50,6 +50,12 @@ const rawInitialListingsData = [
     },
     {
         id: 4, title: 'Mouse Gaming Logitech G102', price: 250000, category: 'Elektronik', condition: 'Bekas', imageUrl: 'https://picsum.photos/seed/mouse/400/300', seller: { name: 'Rina Wijaya', faculty: 'FT', isVerified: true }, description: 'Mouse gaming second, pemakaian 6 bulan, kondisi 95% normal, klik empuk, RGB nyala. Alasan jual karena sudah upgrade.', dateListed: '2024-05-21', location: 'Kampus Indralaya',
+    },
+    {
+        id: 5, title: 'Jasa Mogging', price: 1800000, category: 'Jasa', condition: 'Bekas', imageUrl: 'https://banobagi.vn/wp-content/uploads/2025/04/mewing-meme-3.jpeg', seller: { name: 'Sang Sigma', faculty: 'FASILKOM', isVerified: true }, description: 'Jasa mogging gyatt skibidid toilet, sekali mogging langsung kena fanum tax sperti kai cenat, karkirkurkarkarkarkurkurkur', dateListed: '2024-05-22', location: 'Kampus Indralaya',
+    },
+    {
+        id: 6, title: 'Konversi Diri ke FentDroid', price: 5000000, category: 'Jasa', condition: 'Baru', imageUrl: 'https://images.steamusercontent.com/ugc/2466374324924611315/03FCDCE18AB53C6BA1445CFAB9F0362410119A6F/?imw=512&&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false', seller: { name: 'Cyber Fentworks', faculty: 'FT', isVerified: true }, description: 'Jadilah sang pejuang cyberfent tanpa resiko terkena penyakit cyberpsychosis, 100% no scam for real for real', dateListed: '2024-05-23', location: 'Kampus Bukit',
     }
 ];
 
