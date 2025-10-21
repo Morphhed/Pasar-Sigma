@@ -131,21 +131,8 @@ const initialListings: Product[] = rawInitialListingsData.map(listingData => {
 const API_URL = '/api/data'; // Points to the Vercel Serverless Function
 
 async function saveDataToRemote(data: { users: User[], listings: Product[] }) {
-    try {
-        const response = await fetch(API_URL, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to save data');
-        }
-        console.log('Data saved successfully via API.');
-    } catch (error) {
-        console.error('Error saving data to remote:', error);
-        showNotification('Gagal menyimpan data ke server.', 'error');
-    }
+    // This function is intentionally left empty to disable remote data saving.
+    // All data will be in-memory and reset on page refresh.
 }
 
 // Debounce the save function to avoid excessive API calls
@@ -153,24 +140,8 @@ const debouncedSave = debounce(saveDataToRemote, 1000);
 
 export async function initializeApp() {
     setState({ isLoading: true });
-    try {
-        const response = await fetch(API_URL);
-        if (!response.ok) {
-            throw new Error(`Failed to load data: ${response.statusText}`);
-        }
-        const data = await response.json();
-        setState({
-            users: data.users || initialUsers,
-            listings: data.listings || initialListings,
-            isLoading: false
-        });
-        console.log('Data loaded successfully from API.');
-    } catch (error) {
-        console.error('Could not initialize app with remote data:', error);
-        showNotification('Gagal memuat data. Bekerja dalam mode offline.', 'error');
-        // Fallback to local mock data if API fails
-        setState({ users: initialUsers, listings: initialListings, isLoading: false });
-    }
+    // Database is deactivated, use local mock data directly.
+    setState({ users: initialUsers, listings: initialListings, isLoading: false });
 }
 
 
