@@ -80,22 +80,25 @@ export const faculties = ['FASILKOM', 'FISIP', 'FE', 'FT', 'FKIP', 'FMIPA', 'FK'
 // Raw data for initialization
 const rawInitialListingsData = [
     {
-        id: 1, title: 'Buku Kalkulus Lanjut Edisi 3 - Mulus', price: 150000, category: 'Buku', condition: 'Seperti Baru', imageUrl: 'https://picsum.photos/seed/kalkulus/400/300', seller: { name: 'Andi Pratama', faculty: 'FASILKOM', isVerified: true }, description: 'Buku kalkulus edisi ketiga, kondisi sangat baik seperti baru, tidak ada coretan. Cocok untuk mahasiswa semester awal. Bonus sampul plastik.', dateListed: '2024-05-20', location: 'Kampus Bukit',
+        id: 1, title: 'Buku Kalkulus Lanjut Edisi 3 - Mulus', price: 150000, category: 'Buku', condition: 'Seperti Baru', imageUrl: 'https://static.wikitide.net/italianbrainrotwiki/thumb/b/ba/3.14159265359.webp/800px-3.14159265359.webp.png?20251012161646', seller: { name: 'Andi Pratama', faculty: 'FASILKOM', isVerified: true }, description: 'Buku kalkulus edisi ketiga, kondisi sangat baik seperti baru, tidak ada coretan. Cocok untuk mahasiswa semester awal. Bonus sampul plastik.', dateListed: '2024-05-20', location: 'Kampus Bukit',
     },
     {
-        id: 2, title: 'Jasa Desain Grafis (Poster, Logo)', price: 200000, category: 'Jasa', condition: 'Baru', imageUrl: 'https://picsum.photos/seed/desain/400/300', seller: { name: 'Citra Lestari', faculty: 'FISIP', isVerified: true }, description: 'Menerima jasa desain grafis untuk keperluan acara, tugas, atau bisnis. Pengerjaan cepat dan bisa revisi. Hubungi untuk portofolio.', dateListed: '2024-05-19', location: 'Kampus Bukit',
+        id: 2, title: 'Jasa Desain Grafis (Poster, Logo)', price: 200000, category: 'Jasa', condition: 'Baru', imageUrl: 'https://ih1.redbubble.net/image.5787562977.1547/fposter,small,wall_texture,square_product,600x600.jpg', seller: { name: 'Citra Lestari', faculty: 'FISIP', isVerified: true }, description: 'Menerima jasa desain grafis untuk keperluan acara, tugas, atau bisnis. Pengerjaan cepat dan bisa revisi. Hubungi untuk portofolio.', dateListed: '2024-05-19', location: 'Kampus Bukit',
     },
     {
-        id: 3, title: 'Disewakan Kamar Kost Dekat Unsri Bukit', price: 800000, category: 'Kost', condition: 'Baru', imageUrl: 'https://picsum.photos/seed/kost/400/300', seller: { name: 'Budi Santoso', faculty: 'FE', isVerified: false }, description: 'Kamar kost nyaman, fasilitas lengkap (AC, kamar mandi dalam, kasur, lemari). Lokasi strategis hanya 5 menit dari kampus Unsri Bukit Besar.', dateListed: '2024-05-18', location: 'Kampus Bukit',
+        id: 3, title: 'Disewakan Kamar Kost Dekat Unsri Bukit', price: 800000, category: 'Kost', condition: 'Baru', imageUrl: 'https://scontent-sin11-1.xx.fbcdn.net/v/t39.30808-6/528734575_10162763819664342_3747477318934912300_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=105&ccb=1-7&_nc_sid=aa7b47&_nc_eui2=AeFaxffn9SFv_TO5XTGPzCTAqVmG0Ej5U3epWYbQSPlTdwUT-IwrCjxHK7P9Lc0eSFNP5ywb2bt03qT2DGcgylTL&_nc_ohc=RQCMFPmMoWMQ7kNvwE0qllw&_nc_oc=AdnveNxzvtLAjYon9ubS7FXkfk-Zt_C7jmxgugGJP49J6AdbRySVHrckNp9HdyF3s9ZM9kW_k54cu_Y7P0aW3IAc&_nc_zt=23&_nc_ht=scontent-sin11-1.xx&_nc_gid=zxmSQHCiwse7HsjoRFqelg&oh=00_Afc_2cIP0vgY8T5OJVoJityxnwa_HSXIF3RMXyQB3zg9cQ&oe=68FD4423', seller: { name: 'Budi Santoso', faculty: 'FE', isVerified: true }, description: 'Kamar kost nyaman, fasilitas lengkap (AC, kamar mandi dalam, kasur, lemari). Lokasi strategis hanya 5 menit dari kampus Unsri Bukit Besar.', dateListed: '2024-05-18', location: 'Kampus Bukit',
     },
     {
-        id: 4, title: 'Mouse Gaming Logitech G102', price: 250000, category: 'Elektronik', condition: 'Bekas', imageUrl: 'https://picsum.photos/seed/mouse/400/300', seller: { name: 'Rina Wijaya', faculty: 'FT', isVerified: true }, description: 'Mouse gaming second, pemakaian 6 bulan, kondisi 95% normal, klik empuk, RGB nyala. Alasan jual karena sudah upgrade.', dateListed: '2024-05-21', location: 'Kampus Indralaya',
+        id: 4, title: 'Mouse Gaming Logitech G102', price: 250000, category: 'Elektronik', condition: 'Bekas', imageUrl: 'https://pegastore.id/media/product/produk-1747213282.jpg', seller: { name: 'Rina Wijaya', faculty: 'FT', isVerified: true }, description: 'Mouse gaming second, pemakaian 6 bulan, kondisi 95% normal, klik empuk, RGB nyala. Alasan jual karena sudah upgrade.', dateListed: '2024-05-21', location: 'Kampus Indralaya',
     },
     {
         id: 5, title: 'Jasa Mogging', price: 1800000, category: 'Jasa', condition: 'Bekas', imageUrl: 'https://banobagi.vn/wp-content/uploads/2025/04/mewing-meme-3.jpeg', seller: { name: 'Sang Sigma', faculty: 'FASILKOM', isVerified: true }, description: 'Jasa mogging gyatt skibidid toilet, sekali mogging langsung kena fanum tax sperti kai cenat, karkirkurkarkarkarkurkurkur', dateListed: '2024-05-22', location: 'Kampus Indralaya',
     },
     {
         id: 6, title: 'Konversi Diri ke FentDroid', price: 5000000, category: 'Jasa', condition: 'Baru', imageUrl: 'https://images.steamusercontent.com/ugc/2466374324924611315/03FCDCE18AB53C6BA1445CFAB9F0362410119A6F/?imw=512&&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false', seller: { name: 'Cyber Fentworks', faculty: 'FT', isVerified: true }, description: 'Jadilah sang pejuang cyberfent tanpa resiko terkena penyakit cyberpsychosis, 100% no scam for real for real', dateListed: '2024-05-23', location: 'Kampus Bukit',
+    },
+    {
+        id: 7, title: 'Garam Dan Madu', price: 12000, category: 'Makanan', condition: 'Bekas', imageUrl: 'https://static.wikitide.net/italianbrainrotwiki/thumb/4/46/Garamararamararaman_dan_Madudungdung_tak_tuntung_perkuntung.webp/1080px-Garamararamararaman_dan_Madudungdung_tak_tuntung_perkuntung.webp.png?20250513213052', seller: { name: 'Kaesang Sangkuriang', faculty: 'FH', isVerified: true }, description: 'Dijual garam madu masih bagus, minus hanya sudah terpakai "sedikit". tidak ngaruh apa apa yahahahahahaha', dateListed: '2025-10-22', location: 'Kampus Bukit',
     }
 ];
 
@@ -251,12 +254,14 @@ export function showNotification(message: string, type: 'success' | 'error' = 'e
         const audio = document.getElementById('notification-sound') as HTMLAudioElement;
         if (audio) {
             const isLoginOrRegisterError = type === 'error' && (state.currentView === 'login' || state.currentView === 'register');
-            // Only play sound if it is NOT a login or register error.
-            if (!isLoginOrRegisterError) {
-                audio.volume = 0.1; // Normal volume for other notifications
-                audio.currentTime = 0;
-                audio.play().catch(e => console.error("Error playing sound:", e));
+            // Play a loud sound for login/register errors as requested, and a normal sound for others.
+            if (isLoginOrRegisterError) {
+                audio.volume = 1.0; // Max volume for login/register errors
+            } else {
+                audio.volume = 0.2; // Normal volume for other notifications
             }
+            audio.currentTime = 0;
+            audio.play().catch(e => console.error("Error playing sound:", e));
         }
     }
 
