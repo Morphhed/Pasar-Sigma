@@ -20,7 +20,7 @@ export interface Product {
     sellerId: string;
     title: string;
     price: number;
-    category: 'Buku' | 'Elektronik' | 'Jasa' | 'Kost' | 'Makanan';
+    category: 'Buku' | 'Elektronik' | 'Jasa' | 'Kost' | 'Makanan' | 'Miscellanious' | 'Barang Hobi' | 'kendaraan';
     condition: 'Baru' | 'Seperti Baru' | 'Bekas';
     imageUrl: string;
     seller: {
@@ -83,10 +83,10 @@ const rawInitialListingsData = [
         id: 1, title: 'Buku Kalkulus Lanjut Edisi 3 - Mulus', price: 150000, category: 'Buku', condition: 'Seperti Baru', imageUrl: 'https://static.wikitide.net/italianbrainrotwiki/thumb/b/ba/3.14159265359.webp/800px-3.14159265359.webp.png?20251012161646', seller: { name: 'Andi Pratama', faculty: 'FASILKOM', isVerified: true }, description: 'Buku kalkulus edisi ketiga, kondisi sangat baik seperti baru, tidak ada coretan. Cocok untuk mahasiswa semester awal. Bonus sampul plastik.', dateListed: '2024-05-20', location: 'Kampus Bukit',
     },
     {
-        id: 2, title: 'Jasa Desain Grafis (Poster, Logo)', price: 200000, category: 'Jasa', condition: 'Baru', imageUrl: 'https://ih1.redbubble.net/image.5787562977.1547/fposter,small,wall_texture,square_product,600x600.jpg', seller: { name: 'Citra Lestari', faculty: 'FISIP', isVerified: true }, description: 'Menerima jasa desain grafis untuk keperluan acara, tugas, atau bisnis. Pengerjaan cepat dan bisa revisi. Hubungi untuk portofolio.', dateListed: '2024-05-19', location: 'Kampus Bukit',
+        id: 2, title: 'Jasa Desain Grafis (Poster, Logo)', price: 200000, category: 'Jasa', condition: 'Baru', imageUrl: 'https://ih1.redbubble.net/image.5787562977.1547/fposter,small,wall_texture,square_product,600x600.jpg', seller: { name: 'Sigma Chad', faculty: 'FASILKOM', isVerified: true }, description: 'Menerima jasa desain grafis untuk keperluan acara, tugas, atau bisnis. Pengerjaan cepat dan bisa revisi. Hubungi untuk portofolio.', dateListed: '2024-05-19', location: 'Kampus Bukit',
     },
     {
-        id: 3, title: 'Disewakan Kamar Kost Dekat Unsri Bukit', price: 800000, category: 'Kost', condition: 'Baru', imageUrl: 'https://scontent-sin11-1.xx.fbcdn.net/v/t39.30808-6/528734575_10162763819664342_3747477318934912300_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=105&ccb=1-7&_nc_sid=aa7b47&_nc_eui2=AeFaxffn9SFv_TO5XTGPzCTAqVmG0Ej5U3epWYbQSPlTdwUT-IwrCjxHK7P9Lc0eSFNP5ywb2bt03qT2DGcgylTL&_nc_ohc=RQCMFPmMoWMQ7kNvwE0qllw&_nc_oc=AdnveNxzvtLAjYon9ubS7FXkfk-Zt_C7jmxgugGJP49J6AdbRySVHrckNp9HdyF3s9ZM9kW_k54cu_Y7P0aW3IAc&_nc_zt=23&_nc_ht=scontent-sin11-1.xx&_nc_gid=zxmSQHCiwse7HsjoRFqelg&oh=00_Afc_2cIP0vgY8T5OJVoJityxnwa_HSXIF3RMXyQB3zg9cQ&oe=68FD4423', seller: { name: 'Budi Santoso', faculty: 'FE', isVerified: true }, description: 'Kamar kost nyaman, fasilitas lengkap (AC, kamar mandi dalam, kasur, lemari). Lokasi strategis hanya 5 menit dari kampus Unsri Bukit Besar.', dateListed: '2024-05-18', location: 'Kampus Bukit',
+        id: 3, title: 'Disewakan Kamar Kost Dekat Unsri Bukit', price: 800000, category: 'Kost', condition: 'Baru', imageUrl: 'https://m.gjcdn.net/fireside-post-image/700/38898068-kipxmr6y-v4.webp', seller: { name: 'Budi Santoso', faculty: 'FE', isVerified: true }, description: 'Kamar kost nyaman, fasilitas lengkap (AC, kamar mandi dalam, kasur, lemari). Lokasi strategis hanya 5 menit dari kampus Unsri Bukit Besar.', dateListed: '2024-05-18', location: 'Kampus Bukit',
     },
     {
         id: 4, title: 'Mouse Gaming Logitech G102', price: 250000, category: 'Elektronik', condition: 'Bekas', imageUrl: 'https://pegastore.id/media/product/produk-1747213282.jpg', seller: { name: 'Rina Wijaya', faculty: 'FT', isVerified: true }, description: 'Mouse gaming second, pemakaian 6 bulan, kondisi 95% normal, klik empuk, RGB nyala. Alasan jual karena sudah upgrade.', dateListed: '2024-05-21', location: 'Kampus Indralaya',
@@ -99,7 +99,17 @@ const rawInitialListingsData = [
     },
     {
         id: 7, title: 'Garam Dan Madu', price: 12000, category: 'Makanan', condition: 'Bekas', imageUrl: 'https://static.wikitide.net/italianbrainrotwiki/thumb/4/46/Garamararamararaman_dan_Madudungdung_tak_tuntung_perkuntung.webp/1080px-Garamararamararaman_dan_Madudungdung_tak_tuntung_perkuntung.webp.png?20250513213052', seller: { name: 'Kaesang Sangkuriang', faculty: 'FH', isVerified: true }, description: 'Dijual garam madu masih bagus, minus hanya sudah terpakai "sedikit". tidak ngaruh apa apa yahahahahahaha', dateListed: '2025-10-22', location: 'Kampus Bukit',
-    }
+    },
+    {
+        id: 8, title: 'Pentungan Sahur', price: 50000, category: 'Miscellanious', condition: 'Bekas', imageUrl: 'https://i1.sndcdn.com/artworks-YDQOy2Pru5CA2rhs-x1uzgA-t1080x1080.jpg', seller: { name: 'Danuja Hutagalung', faculty: 'FK', isVerified: true }, description: 'Hanya sekali pakai buat mentungin orang yang susah bangun sahur, masih mulus tungtungtungtungtungtung', dateListed: '2077-05-22', location: 'Kampus Indralaya',
+    },
+    {
+        id: 9, title: 'Mouse Fantech Aria XD7 "Sanji Ed"', price: 260000, category: 'Elektronik', condition: 'Bekas', imageUrl: 'https://p16-images-sign-sg.tokopedia-static.net/tos-alisg-i-aphluv4xwc-sg/img/VqbcmM/2023/12/19/65ed3358-8e91-480b-8b55-96be00a66496.jpg~tplv-aphluv4xwc-resize-jpeg:700:0.jpeg?lk3s=0ccea506&x-expires=1761500365&x-signature=7WQyIINjsmcM6Jm3%2F4D%2FjKH5y6M%3D&x-signature-webp=%2B7qqyL2w0lB%2FVZWAvgirnYPpzAY%3D', seller: { name: 'Azka Alkafi', faculty: 'FASILKOM', isVerified: true }, description: 'Mouse pembelian 22 Mei 2025, Pemakaian rotasi diantara 2 mouse lainnya, masih mulus', dateListed: '2025-10-26', location: 'Kampus Bukit',
+    },
+    {
+        id: 10, title: 'Jasa Mixing Musik', price: 6767676767, category: 'Jasa', condition: 'Baru', imageUrl: 'https://i.kym-cdn.com/entries/icons/original/000/054/055/dj-toenail.jpg', seller: { name: 'Dj ToeNails', faculty: 'FT', isVerified: true }, description: 'Analyser, fucking moderator stance, sound filter, 6 monitors, pedals, drums, a gaming guitar, controller, 6 CONSOLES, 10 computers, BUNCH OF FUCKING WIRES, SOUNDPADS, SPEAKERS, ANTENA, SATELLITE, DOG, DOG CAM, CAT CAM, CAT TREE CAT THIS, and a bunch of dogshit dude, able to analyse NASAs landing speeds dude. rrrrready to screw your mmmusic up DDddrrrude', dateListed: '2024-05-22', location: 'Kampus Indralaya',
+    },
+
 ];
 
 const initialUsers: User[] = Array.from(new Set(rawInitialListingsData.map(p => p.seller.name)))

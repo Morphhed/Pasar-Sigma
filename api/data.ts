@@ -23,7 +23,7 @@ interface Product {
     sellerId: string;
     title: string;
     price: number;
-    category: 'Buku' | 'Elektronik' | 'Jasa' | 'Kost' | 'Makanan';
+    category: 'Buku' | 'Elektronik' | 'Jasa' | 'Kost' | 'Makanan' | 'Miscellanious' | 'Barang Hobi' | 'kendaraan';
     condition: 'Baru' | 'Seperti Baru' | 'Bekas';
     imageUrl: string;
     seller: {

@@ -233,6 +233,9 @@ export const CreateListingModal = (): string => `
                             <option>Jasa</option>
                             <option>Kost</option>
                             <option>Makanan</option>
+                            <option>Miscellanious</option>
+                            <option>Barang Hobi</option>
+                            <option>kendaraan</option>
                         </select>
                     </div>
                     <div>
@@ -345,7 +348,7 @@ function handleCreateListing(event: Event) {
         title: formData.get('title') as string,
         location: formData.get('location') as 'Kampus Indralaya' | 'Kampus Bukit',
         price: Number(formData.get('price')),
-        category: formData.get('category') as 'Buku' | 'Elektronik' | 'Jasa' | 'Kost' | 'Makanan',
+        category: formData.get('category') as 'Buku' | 'Elektronik' | 'Jasa' | 'Kost' | 'Makanan' | 'Miscellanious' | 'Barang Hobi' | 'kendaraan',
         condition: formData.get('condition') as 'Baru' | 'Seperti Baru' | 'Bekas',
         imageUrl: uploadedImages[0].dataUrl, // Use the first uploaded image
         seller: { name: state.currentUser.name, faculty: state.currentUser.faculty, isVerified: state.currentUser.isVerified },
