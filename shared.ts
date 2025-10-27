@@ -61,6 +61,7 @@ export interface AppState {
         conditions: ('Baru' | 'Seperti Baru' | 'Bekas')[];
         minPrice: number | null;
         maxPrice: number | null;
+        category: string | null;
     };
     users: User[];
     currentUser: User | null;
@@ -76,6 +77,8 @@ export interface AppState {
 // This initial data is now primarily used for fallback or local testing.
 // The canonical source of truth is the Vercel KV store, managed by `/api/data`.
 export const faculties = ['FASILKOM', 'FISIP', 'FE', 'FT', 'FKIP', 'FMIPA', 'FK', 'FP', 'FH', 'FKM', 'Pascasarjana'];
+export const categories: Product['category'][] = ['Buku', 'Elektronik', 'Jasa', 'Kost', 'Makanan', 'Miscellanious', 'Barang Hobi', 'kendaraan'];
+
 
 // Raw data for initialization
 const rawInitialListingsData = [
@@ -89,7 +92,7 @@ const rawInitialListingsData = [
         id: 3, title: 'Disewakan Kamar Kost Dekat Unsri Bukit', price: 800000, category: 'Kost', condition: 'Baru', imageUrl: 'https://m.gjcdn.net/fireside-post-image/700/38898068-kipxmr6y-v4.webp', seller: { name: 'Budi Santoso', faculty: 'FE', isVerified: true }, description: 'Kamar kost nyaman, fasilitas lengkap (AC, kamar mandi dalam, kasur, lemari). Lokasi strategis hanya 5 menit dari kampus Unsri Bukit Besar.', dateListed: '2024-05-18', location: 'Kampus Bukit',
     },
     {
-        id: 4, title: 'Mouse Gaming Logitech G102', price: 250000, category: 'Elektronik', condition: 'Bekas', imageUrl: 'https://pegastore.id/media/product/produk-1747213282.jpg', seller: { name: 'Rina Wijaya', faculty: 'FT', isVerified: true }, description: 'Mouse gaming second, pemakaian 6 bulan, kondisi 95% normal, klik empuk, RGB nyala. Alasan jual karena sudah upgrade.', dateListed: '2024-05-21', location: 'Kampus Indralaya',
+        id: 4, title: 'IEM Tangzu WanEr 2', price: 250000, category: 'Barang Hobi', condition: 'Seperti Baru', imageUrl: 'https://csi-zone.id/cdn/shop/files/2_be28b09a-716a-4c8f-92cc-56d618fe112f.png?v=1750467756', seller: { name: 'Azka Alkafi', faculty: 'FASILKOM', isVerified: true }, description: 'IEM Vokalan, Pembelian 26 Agustus 2025, kelengkapan masih lengkap, include sancai. Alasan jual karena kalah audit dgn iem satunya.', dateListed: '2025-10-27', location: 'Kampus Bukit',
     },
     {
         id: 5, title: 'Jasa Mogging', price: 1800000, category: 'Jasa', condition: 'Bekas', imageUrl: 'https://banobagi.vn/wp-content/uploads/2025/04/mewing-meme-3.jpeg', seller: { name: 'Sang Sigma', faculty: 'FASILKOM', isVerified: true }, description: 'Jasa mogging gyatt skibidid toilet, sekali mogging langsung kena fanum tax sperti kai cenat, karkirkurkarkarkarkurkurkur', dateListed: '2024-05-22', location: 'Kampus Indralaya',
@@ -104,7 +107,7 @@ const rawInitialListingsData = [
         id: 8, title: 'Pentungan Sahur', price: 50000, category: 'Miscellanious', condition: 'Bekas', imageUrl: 'https://i1.sndcdn.com/artworks-YDQOy2Pru5CA2rhs-x1uzgA-t1080x1080.jpg', seller: { name: 'Danuja Hutagalung', faculty: 'FK', isVerified: true }, description: 'Hanya sekali pakai buat mentungin orang yang susah bangun sahur, masih mulus tungtungtungtungtungtung', dateListed: '2077-05-22', location: 'Kampus Indralaya',
     },
     {
-        id: 9, title: 'Mouse Fantech Aria XD7 "Sanji Ed"', price: 260000, category: 'Elektronik', condition: 'Bekas', imageUrl: 'https://p16-images-sign-sg.tokopedia-static.net/tos-alisg-i-aphluv4xwc-sg/img/VqbcmM/2023/12/19/65ed3358-8e91-480b-8b55-96be00a66496.jpg~tplv-aphluv4xwc-resize-jpeg:700:0.jpeg?lk3s=0ccea506&x-expires=1761500365&x-signature=7WQyIINjsmcM6Jm3%2F4D%2FjKH5y6M%3D&x-signature-webp=%2B7qqyL2w0lB%2FVZWAvgirnYPpzAY%3D', seller: { name: 'Azka Alkafi', faculty: 'FASILKOM', isVerified: true }, description: 'Mouse pembelian 22 Mei 2025, Pemakaian rotasi diantara 2 mouse lainnya, masih mulus', dateListed: '2025-10-26', location: 'Kampus Bukit',
+        id: 9, title: 'Mouse Fantech Aria XD7 "Sanji Ed"', price: 260000, category: 'Elektronik', condition: 'Bekas', imageUrl: 'https://p16-oec-sg.ibyteimg.com/tos-alisg-i-aphluv4xwc-sg/3825423e86e041d68a7fe735ba13d3a2~tplv-aphluv4xwc-resize-webp:800:800.webp?dr=15584&t=555f072d&ps=933b5bde&shp=6ce186a1&shcp=e1be8f53&idc=my&from=1826719393', seller: { name: 'Azka Alkafi', faculty: 'FASILKOM', isVerified: true }, description: 'Mouse pembelian 22 Mei 2025, Pemakaian rotasi diantara 2 mouse lainnya, masih mulus', dateListed: '2025-10-26', location: 'Kampus Bukit',
     },
     {
         id: 10, title: 'Jasa Mixing Musik', price: 6767676767, category: 'Jasa', condition: 'Baru', imageUrl: 'https://i.kym-cdn.com/entries/icons/original/000/054/055/dj-toenail.jpg', seller: { name: 'Dj ToeNails', faculty: 'FT', isVerified: true }, description: 'Analyser, fucking moderator stance, sound filter, 6 monitors, pedals, drums, a gaming guitar, controller, 6 CONSOLES, 10 computers, BUNCH OF FUCKING WIRES, SOUNDPADS, SPEAKERS, ANTENA, SATELLITE, DOG, DOG CAM, CAT CAM, CAT TREE CAT THIS, and a bunch of dogshit dude, able to analyse NASAs landing speeds dude. rrrrready to screw your mmmusic up DDddrrrude', dateListed: '2024-05-22', location: 'Kampus Indralaya',
@@ -173,7 +176,7 @@ export let state: AppState = {
     isDeleteConfirmationOpen: false,
     deletingProductId: null,
     listings: [],
-    filter: { query: '', faculty: null, location: null, conditions: [], minPrice: null, maxPrice: null },
+    filter: { query: '', faculty: null, location: null, conditions: [], minPrice: null, maxPrice: null, category: null },
     users: [],
     currentUser: null,
     viewingProfileOf: null,
@@ -348,9 +351,9 @@ export const ProductCard = (product: Product): string => {
     return `
     <div data-product-id="${product.id}" class="relative bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 flex flex-col cursor-pointer ${isFlagged ? 'ring-2 ring-red-500' : ''}">
         ${isFlagged ? `<div class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10 flex items-center"><i class="fas fa-flag mr-1.5"></i>Di-flag</div>` : ''}
-        <img src="${product.imageUrl}" alt="${product.title}" class="w-full h-40 object-cover pointer-events-none">
+        <img src="${product.imageUrl}" alt="${product.title}" class="w-full aspect-square object-contain pointer-events-none bg-gray-100">
         <div class="p-4 flex-grow flex flex-col pointer-events-none">
-            <span class="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full self-start">${product.category}</span>
+            <a href="#" data-category="${product.category}" class="pointer-events-auto text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full self-start hover:bg-yellow-300">${product.category}</a>
             <h3 class="font-semibold text-gray-800 mt-2 truncate flex-grow">${product.title}</h3>
             <p class="text-lg font-bold text-gray-900 mt-1">${formatRupiah(product.price)}</p>
             <div class="flex items-center mt-3 text-sm text-gray-600 pointer-events-auto">

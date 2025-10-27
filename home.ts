@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { state, setState, showNotification, formatRupiah, debounce, ProductCard, findUserByName, navigateTo } from './shared';
+import { state, setState, showNotification, formatRupiah, debounce, ProductCard, findUserByName, navigateTo, categories } from './shared';
 import type { Product } from './shared';
 
 // =============== LOCAL STATE FOR MODALS ===============
@@ -41,6 +41,14 @@ export const FilterModal = (): string => {
                                 <span class="ml-2 text-sm text-gray-700">Kampus Bukit</span>
                             </label>
                         </div>
+                    </div>
+                    <!-- Kategori -->
+                    <div>
+                        <label for="filter-category" class="block text-lg font-semibold text-gray-700 mb-3">Kategori</label>
+                        <select id="filter-category" name="category" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500">
+                            <option value="">Semua Kategori</option>
+                            ${categories.map(cat => `<option value="${cat}" ${state.filter.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                        </select>
                     </div>
                     <!-- Kondisi -->
                     <div>
@@ -109,7 +117,8 @@ const HomeHeader = (): string => {
         state.filter.conditions.length +
         (state.filter.minPrice ? 1 : 0) +
         (state.filter.maxPrice ? 1 : 0) +
-        (state.filter.faculty ? 1 : 0);
+        (state.filter.faculty ? 1 : 0) +
+        (state.filter.category ? 1 : 0);
 
     return `
         <header class="bg-white shadow-md sticky top-0 z-10">
@@ -155,11 +164,12 @@ const HomeHeader = (): string => {
 }
 
 export const HomeView = (): string => {
-    const { query, faculty, location, conditions, minPrice, maxPrice } = state.filter;
+    const { query, faculty, location, conditions, minPrice, maxPrice, category } = state.filter;
     const filteredListings = state.listings
         .filter(p => p.title.toLowerCase().includes(query.toLowerCase()))
         .filter(p => faculty ? p.seller.faculty === faculty : true)
         .filter(p => location ? p.location === location : true)
+        .filter(p => category ? p.category === category : true)
         .filter(p => conditions.length > 0 ? conditions.includes(p.condition) : true)
         .filter(p => minPrice !== null ? p.price >= minPrice : true)
         .filter(p => maxPrice !== null ? p.price <= maxPrice : true);
@@ -180,6 +190,13 @@ export const HomeView = (): string => {
                 <div class="flex justify-between items-center bg-green-100 border border-green-300 text-green-800 px-4 py-2 rounded-lg mb-4">
                     <span>Menampilkan produk dari area <strong>${state.filter.location}</strong></span>
                     <button id="clear-location-filter" class="font-bold hover:underline">Hapus Filter &times;</button>
+                </div>
+            ` : ''}
+            
+            ${state.filter.category ? `
+                <div class="flex justify-between items-center bg-blue-100 border border-blue-300 text-blue-800 px-4 py-2 rounded-lg mb-4">
+                    <span>Menampilkan produk dari kategori <strong>${state.filter.category}</strong></span>
+                    <button id="clear-category-filter" class="font-bold hover:underline">Hapus Filter &times;</button>
                 </div>
             ` : ''}
 
@@ -379,7 +396,7 @@ function handleViewOwnProfile() {
 }
 
 function handleGoBackHome() {
-    navigateTo('home', { viewingProfileOf: null, filter: { query: '', faculty: null, location: null, conditions: [], minPrice: null, maxPrice: null } });
+    navigateTo('home', { viewingProfileOf: null, filter: { query: '', faculty: null, location: null, conditions: [], minPrice: null, maxPrice: null, category: null } });
 }
 
 function handleGoBackFromDetail() {
@@ -402,6 +419,7 @@ function handleApplyFilters(event: Event) {
     const formData = new FormData(form);
     
     const location = formData.get('location') as 'Kampus Indralaya' | 'Kampus Bukit' | null;
+    const category = formData.get('category') as string | null;
     const conditions = formData.getAll('condition') as ('Baru' | 'Seperti Baru' | 'Bekas')[];
     const minPrice = formData.get('minPrice') ? Number(formData.get('minPrice')) : null;
     const maxPrice = formData.get('maxPrice') ? Number(formData.get('maxPrice')) : null;
@@ -418,6 +436,7 @@ function handleApplyFilters(event: Event) {
             conditions,
             minPrice,
             maxPrice,
+            category: category === '' ? null : category,
         },
         isFilterModalOpen: false,
     });
@@ -432,6 +451,7 @@ function handleResetFilters() {
             conditions: [],
             minPrice: null,
             maxPrice: null,
+            category: null,
         },
         isFilterModalOpen: false,
     });
@@ -595,6 +615,7 @@ function handleProductGridClick(event: Event) {
     // Regular user actions
     const sellerName = target.closest<HTMLElement>('[data-seller-name]')?.dataset.sellerName;
     const faculty = target.closest<HTMLElement>('[data-faculty]')?.dataset.faculty;
+    const category = target.closest<HTMLElement>('[data-category]')?.dataset.category;
 
     if (sellerName) {
         event.preventDefault();
@@ -610,6 +631,12 @@ function handleProductGridClick(event: Event) {
     if (faculty) {
         event.preventDefault();
         setState({ filter: { ...state.filter, faculty }});
+        return;
+    }
+    
+    if (category) {
+        event.preventDefault();
+        setState({ filter: { ...state.filter, category }});
         return;
     }
 
@@ -632,6 +659,10 @@ function handleClearFacultyFilter() {
 
 function handleClearLocationFilter() {
      setState({ filter: { ...state.filter, location: null } });
+}
+
+function handleClearCategoryFilter() {
+    setState({ filter: { ...state.filter, category: null } });
 }
 
 
@@ -732,6 +763,7 @@ export function attachHomeEventListeners() {
     document.getElementById('sell-button')?.addEventListener('click', handleOpenModal);
     document.getElementById('clear-faculty-filter')?.addEventListener('click', handleClearFacultyFilter);
     document.getElementById('clear-location-filter')?.addEventListener('click', handleClearLocationFilter);
+    document.getElementById('clear-category-filter')?.addEventListener('click', handleClearCategoryFilter);
 
     // Detail page listeners
     document.getElementById('back-from-detail')?.addEventListener('click', handleGoBackFromDetail);
