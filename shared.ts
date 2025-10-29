@@ -118,13 +118,18 @@ const rawInitialListingsData = [
 const initialUsers: User[] = Array.from(new Set(rawInitialListingsData.map(p => p.seller.name)))
     .map((name, index) => {
         const sellerInfo = rawInitialListingsData.find(p => p.seller.name === name)!.seller;
+        // Custom phone number for Azka Alkafi, formatted for WhatsApp link
+        const phone = name === 'Azka Alkafi'
+            ? '6281990774358'
+            : `6281234567${String(index).padStart(3, '0')}`;
+
         return {
             name: sellerInfo.name,
             faculty: sellerInfo.faculty,
             nim: `09011282328${String(index).padStart(3, '0')}`,
             email: `${name.toLowerCase().replace(/\s/g, '')}@unsri.ac.id`,
             password: 'password123',
-            phone: `6281234567${String(index).padStart(3, '0')}`,
+            phone: phone,
             isVerified: sellerInfo.isVerified,
             isAdmin: false,
         };
